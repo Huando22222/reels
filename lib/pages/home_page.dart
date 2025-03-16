@@ -12,6 +12,7 @@ import 'package:reels/pages/camera_review_page.dart';
 import 'package:reels/pages/chat_list_page.dart';
 import 'package:reels/providers/post_provider.dart';
 import 'package:reels/providers/user_provider.dart';
+import 'package:reels/services/utils_service.dart';
 import 'package:reels/widgets/avatar_widget.dart';
 import 'package:reels/widgets/icon_button_widget.dart';
 import 'package:reels/widgets/post_widget.dart';
@@ -20,43 +21,63 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   late PageController _pageCameraController;
+  final _commentController = TextEditingController();
   CameraController? _cameraController;
-  List<CameraDescription> cameras = [];
-  late ValueNotifier<int> _currentPageNotifier;
+  List<CameraDescription> _cameras = [];
+  late ValueNotifier<int> _currentHorizontalPageNotifier;
   final FocusNode _focusNode = FocusNode();
   final ValueNotifier<bool> _isFocusedTextField = ValueNotifier(false);
-  late StreamSubscription<bool> keyboardSubscription;
+  final ValueNotifier<bool> _canShowCommentBox = ValueNotifier(false);
+  final ValueNotifier<bool> _hasTextInComment = ValueNotifier(false);
+  final ValueNotifier<String> _hintTextNotifier =
+      ValueNotifier("say something about it");
+  late StreamSubscription<bool> _keyboardSubscription;
 
   @override
   void initState() {
     super.initState();
     _pageCameraController = PageController();
-    _currentPageNotifier = ValueNotifier<int>(0);
+    _currentHorizontalPageNotifier = ValueNotifier<int>(0);
     _pageCameraController.addListener(_onPageChanged);
     _focusNode.addListener(_onFocusChanged);
     var keyboardVisibilityController = KeyboardVisibilityController();
-    keyboardSubscription =
+    _keyboardSubscription =
         keyboardVisibilityController.onChange.listen((bool visible) {
       _isFocusedTextField.value = visible;
-      log('Keyboard visibility update. Is visible: $visible');
+    });
+    _hintTextNotifier.value = "say something about it";
+    _commentController.addListener(() {
+      _hasTextInComment.value = _commentController.text.isNotEmpty;
     });
     _initializeCamera();
   }
 
   void _onFocusChanged() {
     _isFocusedTextField.value = _focusNode.hasFocus;
+    final currentPage = _pageCameraController.page?.round() ?? 0;
+
+    if (_focusNode.hasFocus && currentPage > 0) {
+      final postProvider = context.read<PostProvider>();
+      if (postProvider.listPosts.isNotEmpty &&
+          currentPage - 1 < postProvider.listPosts.length) {
+        final currentPost = postProvider.listPosts[currentPage - 1];
+        _hintTextNotifier.value = "send to ${currentPost.owner.name}";
+      }
+    } else {
+      _hintTextNotifier.value = "say something about it";
+    }
   }
 
   Future<void> _initializeCamera() async {
-    cameras = await availableCameras();
-    if (cameras.isNotEmpty) {
+    _cameras = await availableCameras();
+    if (_cameras.isNotEmpty) {
       _cameraController = CameraController(
-        cameras.first,
+        _cameras.first,
         ResolutionPreset.high,
       );
       await _cameraController?.initialize();
@@ -66,10 +87,15 @@ class _HomePageState extends State<HomePage> {
 
   void _onPageChanged() {
     final currentPage = _pageCameraController.page?.round() ?? 0;
-    _currentPageNotifier.value = currentPage;
+    _currentHorizontalPageNotifier.value = currentPage;
+    log("${_currentHorizontalPageNotifier.value.toString()}== $currentPage");
+    _commentController.clear();
     if (currentPage != 0) {
       _cameraController?.dispose();
       _cameraController = null;
+      _canShowCommentBox.value =
+          context.read<PostProvider>().listPosts[currentPage - 1].owner.uid !=
+              context.read<UserProvider>().userData!.uid;
       setState(() {});
     } else if (_cameraController == null) {
       _initializeCamera();
@@ -77,10 +103,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _updateCameraController(int cameraIndex) async {
-    if (cameras.isEmpty) return;
+    if (_cameras.isEmpty) return;
     await _cameraController?.dispose();
     _cameraController = CameraController(
-      cameras[cameraIndex],
+      _cameras[cameraIndex],
       ResolutionPreset.high,
     );
     await _cameraController?.initialize();
@@ -91,11 +117,15 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _pageCameraController.removeListener(_onPageChanged);
     _pageCameraController.dispose();
-    _currentPageNotifier.dispose();
+    _currentHorizontalPageNotifier.dispose();
     _cameraController?.dispose();
     _focusNode.removeListener(_onFocusChanged);
     _focusNode.dispose();
-    keyboardSubscription.cancel();
+    _keyboardSubscription.cancel();
+    _hasTextInComment.dispose();
+    _canShowCommentBox.dispose();
+    _hintTextNotifier.dispose();
+    _commentController.dispose();
     super.dispose();
   }
 
@@ -148,7 +178,7 @@ class _HomePageState extends State<HomePage> {
                         if (index == 0) {
                           return CameraReviewPage(
                             cameraController: _cameraController,
-                            cameras: cameras,
+                            cameras: _cameras,
                             onCameraSwitch: _updateCameraController,
                           );
                         }
@@ -163,7 +193,7 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
                     ValueListenableBuilder(
-                        valueListenable: _currentPageNotifier,
+                        valueListenable: _currentHorizontalPageNotifier,
                         builder: (context, isFocused, child) {
                           final currentPage =
                               _pageCameraController.page?.round() ?? 0;
@@ -199,35 +229,75 @@ class _HomePageState extends State<HomePage> {
                                     right: 0,
                                     child: Column(
                                       children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(),
-                                            borderRadius:
-                                                BorderRadius.circular(25),
-                                            color: Colors.grey.withAlpha(100),
-                                          ),
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.8,
-                                          height: 50,
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                          child: TextField(
-                                            focusNode: _focusNode,
-                                            onSubmitted: (value) {
-                                              _focusNode.unfocus();
-                                            },
-                                            textInputAction:
-                                                TextInputAction.done,
-                                            decoration: InputDecoration(
-                                              hintText:
-                                                  "say something about it",
-                                              border: InputBorder.none,
-                                              hintStyle:
-                                                  TextStyle(color: Colors.grey),
-                                            ),
-                                          ),
+                                        ValueListenableBuilder(
+                                          valueListenable: _canShowCommentBox,
+                                          builder: (context, value, child) {
+                                            if (value == false) {
+                                              return SizedBox.shrink();
+                                            }
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(),
+                                                borderRadius:
+                                                    BorderRadius.circular(25),
+                                                color:
+                                                    Colors.grey.withAlpha(100),
+                                              ),
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.8,
+                                              height: 50,
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 10),
+                                              child: ValueListenableBuilder<
+                                                  String>(
+                                                valueListenable:
+                                                    _hintTextNotifier,
+                                                builder:
+                                                    (context, hintText, child) {
+                                                  return ValueListenableBuilder<
+                                                      bool>(
+                                                    valueListenable:
+                                                        _hasTextInComment,
+                                                    builder: (context, hasText,
+                                                        child) {
+                                                      return TextField(
+                                                        focusNode: _focusNode,
+                                                        controller:
+                                                            _commentController,
+                                                        onSubmitted: (value) {
+                                                          _focusNode.unfocus();
+                                                        },
+                                                        textInputAction:
+                                                            TextInputAction
+                                                                .done,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          hintText: hintText,
+                                                          border:
+                                                              InputBorder.none,
+                                                          hintStyle: TextStyle(
+                                                              color:
+                                                                  Colors.grey),
+                                                          suffixIcon: hasText
+                                                              ? IconButtonWidget(
+                                                                  onTap: () {},
+                                                                  hugeIcon:
+                                                                      HugeIcons
+                                                                          .strokeRoundedSent,
+                                                                  color: Colors
+                                                                      .blue,
+                                                                )
+                                                              : null,
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            );
+                                          },
                                         ),
                                         if (!isFocused)
                                           Row(
@@ -271,7 +341,12 @@ class _HomePageState extends State<HomePage> {
                                                 hugeIcon: HugeIcons
                                                     .strokeRoundedDownload04,
                                                 color: Colors.grey,
-                                                onTap: () {},
+                                                onTap: () {
+                                                  UtilsService.showSnackBar(
+                                                    context: context,
+                                                    content: "saved",
+                                                  );
+                                                },
                                                 size: 32.0,
                                               ),
                                             ],

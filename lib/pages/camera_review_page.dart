@@ -2,11 +2,10 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:gal/gal.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:reels/providers/post_provider.dart';
+import 'package:reels/services/utils_service.dart';
 import 'package:reels/widgets/icon_button_widget.dart';
 
 class CameraReviewPage extends StatefulWidget {
@@ -93,8 +92,9 @@ class _CameraReviewPageState extends State<CameraReviewPage> {
                         .createPost(
                             imagePath: _capturedImage!.path, context: context);
                     if (result) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('post success!')),
+                      UtilsService.showSnackBar(
+                        context: context,
+                        content: 'post success!',
                       );
                       _resetCamera();
                     }
@@ -105,7 +105,12 @@ class _CameraReviewPageState extends State<CameraReviewPage> {
                 IconButtonWidget(
                   hugeIcon: HugeIcons.strokeRoundedDownload04,
                   color: Colors.grey,
-                  onTap: _saveImage,
+                  onTap: () {
+                    UtilsService.saveImage(
+                      context: context,
+                      file: _capturedImage!,
+                    );
+                  },
                   size: 32.0,
                 ),
               ] else ...[
@@ -139,7 +144,9 @@ class _CameraReviewPageState extends State<CameraReviewPage> {
   Future<void> _switchCamera() async {
     if (widget.cameraController == null ||
         _isCapturing ||
-        widget.cameras.length < 2) return;
+        widget.cameras.length < 2) {
+      return;
+    }
 
     _currentCameraIndex = (_currentCameraIndex + 1) % widget.cameras.length;
     await widget.onCameraSwitch(_currentCameraIndex);
@@ -160,7 +167,7 @@ class _CameraReviewPageState extends State<CameraReviewPage> {
         _isCapturing = false;
       });
     } catch (e) {
-      debugPrint("Error taking picture: $e");
+      log("Error taking picture: $e");
       setState(() => _isCapturing = false);
     }
   }
@@ -169,21 +176,5 @@ class _CameraReviewPageState extends State<CameraReviewPage> {
     setState(() {
       _capturedImage = null;
     });
-  }
-
-  Future<void> _saveImage() async {
-    if (_capturedImage == null) return;
-
-    try {
-      await Gal.putImage(_capturedImage!.path).then(
-        (value) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Image saved!')),
-          );
-        },
-      );
-    } on GalException catch (e) {
-      log(e.type.message);
-    }
   }
 }

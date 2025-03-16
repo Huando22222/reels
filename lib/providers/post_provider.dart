@@ -13,12 +13,11 @@ import 'package:reels/services/push_notification_service.dart';
 class PostProvider extends ChangeNotifier {
   List<PostModel> listPosts = [];
   StreamSubscription<DocumentSnapshot>? _postSubscription;
-  void listenForMessage() async {
+  void listenForPost() async {
     FirebaseFirestore.instance
         .collection('posts')
         .where('visibleTo',
             arrayContains: FirebaseAuth.instance.currentUser!.uid)
-        // .orderBy('createdAt', descending: true)
         .snapshots()
         .listen(
       (snapshot) {
@@ -53,12 +52,10 @@ class PostProvider extends ChangeNotifier {
       ImageService imageService = ImageService();
       PushNotificationService pushNotificationService =
           PushNotificationService();
-
       final urlBucket = await imageService.uploadImage(
         filePath: imagePath,
         folderPath: 'posts/${context.read<UserProvider>().userData!.email}',
       );
-
       if (urlBucket == null || urlBucket.isEmpty) return false;
       final data = context.read<UserProvider>().userData!;
 
@@ -74,13 +71,6 @@ class PostProvider extends ChangeNotifier {
           .collection('posts')
           .doc(post.id)
           .set(post.toJson());
-
-      await pushNotificationService.sendNotificationToSelectedUser(
-        context: context,
-        title: 'New Post',
-        body: "${data.name} has new status",
-        data: {},
-      );
       // for (var friend in data.friends) {
       //   pushNotificationService.sendNotificationToSelectedUser(
       //     //id

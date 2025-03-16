@@ -88,7 +88,7 @@ class UserProvider extends ChangeNotifier {
   void addAllListeners({required BuildContext context}) {
     context.read<ChatListProvider>().listenForNewChats();
     context.read<NotificationProvider>().listenForNotification();
-    context.read<PostProvider>().listenForMessage();
+    context.read<PostProvider>().listenForPost();
   }
 
   Future<void> signOut(BuildContext context) async {

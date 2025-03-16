@@ -10,6 +10,7 @@ import 'package:reels/providers/chat_provider.dart';
 import 'package:reels/providers/user_provider.dart';
 import 'package:reels/services/image_service.dart';
 import 'package:reels/services/push_notification_service.dart';
+import 'package:reels/services/utils_service.dart';
 import 'package:reels/widgets/avatar_widget.dart';
 import 'package:reels/widgets/icon_button_widget.dart';
 import 'package:reels/widgets/screen_wrapper_widget.dart';
@@ -79,10 +80,10 @@ class _ChatPageState extends State<ChatPage> {
                 data: {},
               );
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Can\'t send message now'),
-                    duration: Duration(seconds: 3)),
+              UtilsService.showSnackBar(
+                context: context,
+                content: 'Can\'t send Image now',
+                isError: true,
               );
             }
           } finally {
@@ -119,10 +120,10 @@ class _ChatPageState extends State<ChatPage> {
         _messageController.clear();
         _hasText.value = false;
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Can\'t send message now'),
-              duration: Duration(seconds: 3)),
+        UtilsService.showSnackBar(
+          context: context,
+          content: 'Can\'t send message now',
+          isError: true,
         );
       }
       FocusScope.of(context).unfocus();
@@ -260,7 +261,7 @@ class _ChatPageState extends State<ChatPage> {
                   child: TextField(
                     controller: _messageController,
                     onChanged: (text) {
-                      _hasText.value = text.isNotEmpty;
+                      _hasText.value = text.trim().isNotEmpty;
                     },
                     decoration: InputDecoration(
                       hintText: "Aa",
