@@ -42,11 +42,11 @@ class PostWidget extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            UtilsService.formatTime(post.createdAt),
+          SizedBox(
+            height: 20,
           ),
           SizedBox(
-            width: size.width * 0.7,
+            width: size.width * 0.5,
             child: Row(
               spacing: 20,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -58,12 +58,21 @@ class PostWidget extends StatelessWidget {
                   pathImage: post.owner.image,
                 ),
                 Flexible(
-                  child: Text(
-                    context.read<UserProvider>().userData!.uid == post.owner.uid
-                        ? "you"
-                        : post.owner.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.clip,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        context.read<UserProvider>().userData!.uid ==
+                                post.owner.uid
+                            ? "you"
+                            : post.owner.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                      ),
+                      Text(
+                        UtilsService.formatTime(post.createdAt),
+                      ),
+                    ],
                   ),
                 ),
               ],

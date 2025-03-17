@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +14,6 @@ import 'package:reels/services/push_notification_service.dart';
 import 'package:reels/widgets/avatar_widget.dart';
 import 'package:reels/widgets/icon_button_widget.dart';
 import 'package:reels/widgets/screen_wrapper_widget.dart';
-import 'package:reels/widgets/screen_wrapper_widget.dart';
 
 enum FriendType {
   friend,
@@ -23,6 +23,147 @@ enum FriendType {
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
+
+  void showModal({required BuildContext context}) async {
+    final size = MediaQuery.of(context).size;
+    final userData = context.read<UserProvider>().userData!;
+    final FirebaseService firebaseService = FirebaseService();
+
+    List<UserModel> listFriends =
+        await firebaseService.getListUser(userData.friends);
+    List<UserModel> listFriendsReq =
+        await firebaseService.getListUser(userData.friendRequests);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          height: size.height * 0.8,
+          width: size.width,
+          decoration: BoxDecoration(
+            // color: Colors.amber,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(14),
+              topRight: Radius.circular(14),
+            ),
+          ),
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text("${userData.friends.length}/20 Friends"),
+                _buildBadge(
+                  icon: HugeIcons.strokeRoundedShare01,
+                  title: 'Find friends from other apps',
+                ),
+                Container(
+                  decoration: BoxDecoration(),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
+                          Image.asset(
+                            "assets/icons/messenger.png",
+                            height: 64,
+                            width: 64,
+                          ),
+                          Text('messenger'),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Image.asset(
+                            "assets/icons/instagram.png",
+                            height: 64,
+                            width: 64,
+                          ),
+                          Text('instagram'),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Image.asset(
+                            "assets/icons/zalo.png",
+                            height: 64,
+                            width: 64,
+                          ),
+                          Text('zalo'),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 10,
+                            ),
+                            height: 44,
+                            width: 44,
+                            decoration: BoxDecoration(
+                                color: Colors.amber, shape: BoxShape.circle),
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedLink01,
+                              color: Colors.black,
+                              size: 24.0,
+                            ),
+                          ),
+                          Text('Link'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                _buildBadge(
+                  icon: HugeIcons.strokeRoundedUserMultiple02,
+                  title: 'Friends',
+                ),
+                ...List.generate(
+                  growable: true,
+                  listFriends.length,
+                  (index) {
+                    return ListTile(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(AppRoute.profile,
+                            arguments: listFriends[index]);
+                      },
+                      leading: AvatarWidget(
+                        pathImage: listFriends[index].image,
+                      ),
+                      title: Text(listFriends[index].name),
+                    );
+                  },
+                ),
+                _buildBadge(
+                  icon: HugeIcons.strokeRoundedUserAdd02,
+                  title: 'Friends request',
+                ),
+                ...List.generate(
+                  growable: true,
+                  listFriendsReq.length,
+                  (index) {
+                    return ListTile(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(AppRoute.profile,
+                            arguments: listFriendsReq[index]);
+                      },
+                      leading: AvatarWidget(
+                        pathImage: listFriendsReq[index].image,
+                      ),
+                      title: Text(listFriendsReq[index].name),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +189,10 @@ class ProfilePage extends StatelessWidget {
       title: "Profile",
       actions: [
         if (otherUserData == null) ...[
+          IconButtonWidget(
+            hugeIcon: HugeIcons.strokeRoundedUserMultiple02,
+            onTap: () => showModal(context: context),
+          ),
           IconButtonWidget(
             hugeIcon: HugeIcons.strokeRoundedAccountSetting02,
             onTap: () {
@@ -184,6 +329,19 @@ class ProfilePage extends StatelessWidget {
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildBadge({required IconData icon, required String title}) {
+    return Row(
+      children: [
+        HugeIcon(
+          icon: icon, //HugeIcons.strokeRoundedShare01,
+          color: Colors.black,
+          size: 24.0,
+        ),
+        Text(title),
       ],
     );
   }

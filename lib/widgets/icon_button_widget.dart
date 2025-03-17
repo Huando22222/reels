@@ -21,7 +21,6 @@ class IconButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dv = MediaQuery.of(context).size;
     final double paddingValue = padding ?? 10.0;
     final double iconSize = size ?? 24.0;
     final double buttonSize = iconSize + (paddingValue * 2);

@@ -91,6 +91,14 @@ class UserProvider extends ChangeNotifier {
     context.read<PostProvider>().listenForPost();
   }
 
+  Future<void> setStatusActivity({required bool isOnline}) async {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(_auth.currentUser!.uid)
+        .set({"isOnline": isOnline}, SetOptions(merge: true));
+    log("set status $isOnline");
+  }
+
   Future<void> signOut(BuildContext context) async {
     _cancelUserDataSubscription();
     userData = null;

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -13,7 +12,6 @@ import 'package:reels/providers/user_provider.dart';
 import 'package:reels/services/firebase_service.dart';
 import 'package:reels/services/push_notification_service.dart';
 import 'package:reels/widgets/avatar_widget.dart';
-import 'package:reels/widgets/screen_wrapper_widget.dart';
 import 'package:reels/widgets/screen_wrapper_widget.dart';
 
 class SearchPage extends StatefulWidget {
@@ -58,12 +56,11 @@ class _SearchPageState extends State<SearchPage> {
               title: Text("Are you sure to unfriend?"),
               actions: [
                 TextButton(
-                  onPressed: () =>
-                      Navigator.of(context).pop(false), // Không xóa
+                  onPressed: () => Navigator.of(context).pop(false),
                   child: Text("No"),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(true), // Xóa
+                  onPressed: () => Navigator.of(context).pop(true),
                   child: Text("Yes"),
                 ),
               ],
@@ -94,13 +91,8 @@ class _SearchPageState extends State<SearchPage> {
             ),
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
             child: Row(
-              spacing: 20,
+              spacing: 50,
               children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedSearchArea,
-                  color: Colors.black,
-                  size: 24.0,
-                ),
                 Expanded(
                   child: TextField(
                     controller: _searchController,
@@ -110,18 +102,26 @@ class _SearchPageState extends State<SearchPage> {
                         _onSearch();
                       }
                     },
+                    textAlign: TextAlign.center,
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: "Search...",
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      hintText: "Search  by email",
+                      hintStyle: TextStyle(),
                     ),
                   ),
+                ),
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedSearch01,
+                  color: Colors.black,
+                  size: 24.0,
                 ),
               ],
             ),
           ),
 
           //
-          if (_searchList.isEmpty) Text("search by email"),
           if (_searchList.isNotEmpty)
             Expanded(
               child: ListView.separated(
@@ -146,7 +146,6 @@ class _SearchPageState extends State<SearchPage> {
                       onTap: () {
                         Navigator.of(context).pushNamed(AppRoute.profile,
                             arguments: _searchList[index]);
-                        //TODO:
                       },
                       leading:
                           AvatarWidget(pathImage: _searchList[index].image),

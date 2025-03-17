@@ -6,9 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reels/pages/home_page.dart';
 import 'package:reels/pages/verified_email.dart';
-import 'package:reels/providers/chat_list_provider.dart';
-import 'package:reels/providers/notification_provider.dart';
-import 'package:reels/providers/post_provider.dart';
 import 'package:reels/providers/user_provider.dart';
 import 'package:reels/services/firebase_service.dart';
 import 'package:reels/services/push_notification_service.dart';
@@ -34,9 +31,6 @@ class _AuthGatePageState extends State<AuthGatePage> {
     isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
     pushNotificationService.firebaseNotification(context: context);
     if (isEmailVerified) {
-      // context.read<ChatListProvider>().listenForNewChats();
-      // context.read<NotificationProvider>().listenForNotification();
-      // context.read<PostProvider>().listenForMessage();
       context.read<UserProvider>().addAllListeners(context: context);
     }
   }

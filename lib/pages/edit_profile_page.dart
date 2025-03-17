@@ -1,9 +1,7 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:reels/const/app_colors.dart';
 import 'package:reels/models/response.dart';
@@ -27,14 +25,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final ImageService _imageService = ImageService();
   final ValueNotifier<bool> _isNameEmpty = ValueNotifier(false);
   File? _imageFile;
-  bool _isUpdating = false; // Trạng thái cập nhật
+  bool _isUpdating = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(
       text: context.read<UserProvider>().userData!.name,
-    ); // Khởi tạo trực tiếp
+    );
   }
 
   @override
@@ -60,13 +58,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       final updatedUser = userProvider.userData!.copyWith(
         image: imageUrl,
-        name: _nameController.text.trim(), // Loại bỏ khoảng trắng thừa
+        name: _nameController.text.trim(),
       );
 
       final ResponseModel res =
           await _authService.upsertUser(user: updatedUser);
       if (res.success) {
-        await userProvider.getUserData(); // Cập nhật dữ liệu local
+        await userProvider.getUserData();
         _showSnackBar(res.msg, isError: false);
       } else {
         _showSnackBar(res.msg, isError: true);
@@ -108,12 +106,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
         IconButtonWidget(
           hugeIcon: HugeIcons.strokeRoundedAllBookmark,
           onTap: _isUpdating ? null : () => _updateProfile(userProvider),
-          color: _isUpdating ? Colors.grey : null, // Disable khi đang cập nhật
+          color: _isUpdating ? Colors.grey : null,
         ),
       ],
       child: Column(
         children: [
-          const SizedBox(height: 20), // Khoảng cách trên cùng
+          const SizedBox(height: 20),
           AvatarWidget(
             pathImage: userProvider.userData!.image,
             imageFile: _imageFile,
@@ -121,7 +119,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             isCircle: true,
             onTap: _pickImage,
           ),
-          const SizedBox(height: 20), // Khoảng cách giữa avatar và text field
+          const SizedBox(height: 20),
           ValueListenableBuilder<bool>(
             valueListenable: _isNameEmpty,
             builder: (context, isEmpty, child) {
@@ -142,7 +140,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       color: Colors.black,
                       size: 24.0,
                     ),
-                    const SizedBox(width: 10), // Thay spacing bằng SizedBox
+                    const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
                         controller: _nameController,

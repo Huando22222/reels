@@ -16,7 +16,6 @@ class RecoverEmailPage extends StatefulWidget {
 
 class _RecoverEmailPageState extends State<RecoverEmailPage> {
   final TextEditingController _emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
   final FirebaseService _authService = FirebaseService();
   bool _validEmail = true;
   bool _isLoading = false;

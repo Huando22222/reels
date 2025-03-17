@@ -110,23 +110,26 @@ class _ChatPageState extends State<ChatPage> {
             content: _messageController.text,
             receiverId: _otherUserData!.uid.trim(),
           );
-      if (success) {
-        _pushNotificationService.sendNotificationToSelectedUser(
-          context: context,
-          title: _otherUserData!.name,
-          body: _messageController.text,
-          data: {},
-        );
-        _messageController.clear();
-        _hasText.value = false;
-      } else {
-        UtilsService.showSnackBar(
-          context: context,
-          content: 'Can\'t send message now',
-          isError: true,
-        );
+      if (mounted) {
+        if (success) {
+          _pushNotificationService.sendNotificationToSelectedUser(
+            context: context,
+            title: _otherUserData!.name,
+            body: _messageController.text,
+            data: {},
+          );
+          _messageController.clear();
+          _hasText.value = false;
+        } else {
+          UtilsService.showSnackBar(
+            context: context,
+            content: 'Can\'t send message now',
+            isError: true,
+          );
+        }
+
+        FocusScope.of(context).unfocus();
       }
-      FocusScope.of(context).unfocus();
     } finally {
       setState(() {
         _isSending = false;
@@ -171,6 +174,7 @@ class _ChatPageState extends State<ChatPage> {
                           ? Alignment.centerRight
                           : Alignment.centerLeft,
                       child: Container(
+                        constraints: BoxConstraints(maxWidth: size.width * 0.7),
                         margin: EdgeInsets.symmetric(
                             vertical: 4.0, horizontal: 8.0),
                         padding: isText

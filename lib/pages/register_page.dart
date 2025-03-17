@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -245,6 +243,4 @@ class _RegisterPageState extends State<RegisterPage> {
         password == confirmPassword &&
         password.length >= 6;
   }
-
-  /// Hiển thị thông báo lỗi
 }

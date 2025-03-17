@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
 
@@ -76,6 +77,28 @@ class UtilsService {
   }) async {
     try {
       await Gal.putImage(file.path).then(
+        (value) {
+          showSnackBar(context: context, content: "saved image");
+        },
+      );
+    } on GalException catch (e) {
+      log(e.toString());
+      showSnackBar(
+        context: context,
+        content: "error when trying save image",
+        isError: true,
+      );
+    }
+  }
+
+  static void saveImageFromUrl({
+    required BuildContext context,
+    required String url,
+  }) async {
+    try {
+      final imagePath = '${Directory.systemTemp.path}/image.jpg';
+      await Dio().download(url, imagePath);
+      await Gal.putImage(imagePath).then(
         (value) {
           showSnackBar(context: context, content: "saved image");
         },

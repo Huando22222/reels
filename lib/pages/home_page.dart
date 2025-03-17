@@ -24,7 +24,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late PageController _pageCameraController;
   final _commentController = TextEditingController();
   CameraController? _cameraController;
@@ -41,6 +41,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pageCameraController = PageController();
     _currentHorizontalPageNotifier = ValueNotifier<int>(0);
     _pageCameraController.addListener(_onPageChanged);
@@ -114,7 +115,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    log("AppLifecycleState: $state");
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        log("App is in foreground");
+        break;
+      case AppLifecycleState.inactive:
+        log("App is inactive");
+        context.read<UserProvider>().setStatusActivity(isOnline: true);
+        break;
+      case AppLifecycleState.paused:
+        log("App is in background");
+        context.read<UserProvider>().setStatusActivity(isOnline: false);
+        break;
+      case AppLifecycleState.detached:
+        log("App is detached (may be terminating)");
+        break;
+      case AppLifecycleState.hidden:
+        log("App is detached (may be terminating)");
+        break;
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageCameraController.removeListener(_onPageChanged);
     _pageCameraController.dispose();
     _currentHorizontalPageNotifier.dispose();
@@ -147,7 +175,7 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           IconButtonWidget(
-            hugeIcon: HugeIcons.strokeRoundedSearchArea,
+            hugeIcon: HugeIcons.strokeRoundedSearch01,
             onTap: () {
               Navigator.of(context).pushNamed(AppRoute.search);
             },
@@ -272,6 +300,18 @@ class _HomePageState extends State<HomePage> {
                                                         textInputAction:
                                                             TextInputAction
                                                                 .done,
+                                                        style: TextStyle(
+                                                          color: _isFocusedTextField
+                                                                  .value
+                                                              ? Colors.white
+                                                              : Colors
+                                                                  .grey, // Màu chữ
+                                                        ),
+                                                        cursorColor:
+                                                            _isFocusedTextField
+                                                                    .value
+                                                                ? Colors.white
+                                                                : Colors.grey,
                                                         decoration:
                                                             InputDecoration(
                                                           hintText: hintText,
@@ -342,10 +382,15 @@ class _HomePageState extends State<HomePage> {
                                                     .strokeRoundedDownload04,
                                                 color: Colors.grey,
                                                 onTap: () {
-                                                  UtilsService.showSnackBar(
-                                                    context: context,
-                                                    content: "saved",
-                                                  );
+                                                  UtilsService.saveImageFromUrl(
+                                                      context: context,
+                                                      url: context
+                                                          .read<PostProvider>()
+                                                          .listPosts[
+                                                              _currentHorizontalPageNotifier
+                                                                      .value -
+                                                                  1]
+                                                          .image);
                                                 },
                                                 size: 32.0,
                                               ),

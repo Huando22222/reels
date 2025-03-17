@@ -45,7 +45,6 @@ class FirebaseService {
           .doc(uid)
           .get(const GetOptions(source: Source.server));
       if (data.exists) {
-        // log("data:${data.data()!}"); //first time always token ?
         return UserModel.fromJson(data.data()!);
       }
       return null;
@@ -252,5 +251,34 @@ class FirebaseService {
       log("Error handling friend request: $e");
       return false;
     }
+  }
+
+  Future<List<UserModel>> getListUser(List<String> listUserId) async {
+    if (listUserId.isEmpty) {
+      return [];
+    }
+
+    const int batchSize = 10;
+    List<UserModel> returnList = [];
+
+    for (int i = 0; i < listUserId.length; i += batchSize) {
+      final batch = listUserId.sublist(
+        i,
+        i + batchSize > listUserId.length ? listUserId.length : i + batchSize,
+      );
+
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: batch)
+          .get();
+
+      final usersBatch = querySnapshot.docs
+          .map((doc) => UserModel.fromJson(doc.data()))
+          .toList();
+
+      returnList.addAll(usersBatch);
+    }
+
+    return returnList;
   }
 }

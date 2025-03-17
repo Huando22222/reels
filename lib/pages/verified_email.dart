@@ -1,11 +1,6 @@
-import 'dart:developer';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:reels/services/firebase_service.dart';
 import 'package:reels/widgets/screen_wrapper_widget.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:rive/rive.dart' as rive;
 
 class VerifiedEmail extends StatelessWidget {
