@@ -33,10 +33,10 @@ class AppTheme {
       primary: AppColors.lightPrimary,
       secondary: AppColors.lightSecondary,
       surface: AppColors.lightSurface,
+      onSurface: AppColors.lightTextPrimary,
       error: AppColors.lightError,
       onPrimary: Colors.white,
       onSecondary: Colors.black,
-      onSurface: AppColors.lightTextPrimary,
       onError: Colors.white,
     ),
   );

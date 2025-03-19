@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -26,8 +28,22 @@ class ScreenWrapperWidget extends StatelessWidget {
     return Scaffold(
       bottomSheet: bottomSheet,
       extendBody: false,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
+        elevation: 0,
         backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black,
+                Colors.red,
+              ],
+            ),
+          ),
+        ),
         leading: showBackButton
             ? (Navigator.canPop(context)
                 ? GestureDetector(
@@ -49,11 +65,32 @@ class ScreenWrapperWidget extends StatelessWidget {
             : null,
         actions: actions,
       ),
-      body: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          child: child),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black,
+                      const Color.fromARGB(118, 0, 0, 0),
+                      Colors.red,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
+              },
+              child: child),
+        ],
+      ),
     );
   }
 }

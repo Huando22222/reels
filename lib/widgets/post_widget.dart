@@ -20,16 +20,13 @@ class PostWidget extends StatelessWidget {
     final paddingHorizontal = 20.0;
     return Padding(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top,
+        // top: MediaQuery.of(context).padding.top,
         left: paddingHorizontal,
         right: paddingHorizontal,
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: size.height * 0.1,
-          ),
           Container(
             decoration: BoxDecoration(),
             height: MediaQuery.of(context).size.width - 2 * paddingHorizontal,
@@ -53,7 +50,6 @@ class PostWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 AvatarWidget(
-                  isCircle: true,
                   size: 50,
                   pathImage: post.owner.image,
                 ),

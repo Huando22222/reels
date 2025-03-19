@@ -9,6 +9,7 @@ import 'package:reels/pages/verified_email.dart';
 import 'package:reels/providers/user_provider.dart';
 import 'package:reels/services/firebase_service.dart';
 import 'package:reels/services/push_notification_service.dart';
+import 'package:reels/widgets/loading_widget.dart';
 
 class AuthGatePage extends StatefulWidget {
   const AuthGatePage({super.key});
@@ -72,7 +73,9 @@ class _AuthGatePageState extends State<AuthGatePage> {
       if (context.read<UserProvider>().isLoading) {
         return Scaffold(
           body: Center(
-            child: Text("loading screen"),
+            child: LoadingWidget(
+              duration: Duration(milliseconds: 1000),
+            ),
           ),
         );
       } else {

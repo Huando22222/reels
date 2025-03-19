@@ -147,7 +147,6 @@ class _ChatPageState extends State<ChatPage> {
           margin: EdgeInsets.only(right: 10),
           child: AvatarWidget(
             pathImage: _otherUserData!.image,
-            isCircle: true,
             size: 50,
           ),
         ),
@@ -165,88 +164,33 @@ class _ChatPageState extends State<ChatPage> {
                     final bool isAuthMessage =
                         chatProvider.messages[index].senderId ==
                             context.read<UserProvider>().userData!.uid;
-                    final bool isText =
-                        chatProvider.messages[index].messageType ==
-                            MessageType.text;
 
-                    return Align(
-                      alignment: isAuthMessage
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Container(
-                        constraints: BoxConstraints(maxWidth: size.width * 0.7),
-                        margin: EdgeInsets.symmetric(
-                            vertical: 4.0, horizontal: 8.0),
-                        padding: isText
-                            ? EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 12.0)
-                            : EdgeInsets.all(4.0),
-                        decoration: BoxDecoration(
-                          color: isAuthMessage
-                              ? Colors.blue[100]
-                              : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4.0,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: isText
-                            ? Text(
-                                chatProvider.messages[index].content,
-                                style: TextStyle(
-                                  color: isAuthMessage
-                                      ? Colors.black87
-                                      : Colors.black54,
-                                  fontSize: 16.0,
-                                ),
-                              )
-                            : GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ImageViewPage(
-                                        imageUrl: chatProvider
-                                            .messages[index].content,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.network(
-                                    chatProvider.messages[index].content,
-                                    width: size.width * 0.5,
-                                    height: size.width * 0.5,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder:
-                                        (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Container(
-                                        width: size.width * 0.5,
-                                        height: size.width * 0.5,
-                                        child: Center(
-                                            child: CircularProgressIndicator()),
-                                      );
-                                    },
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        width: size.width * 0.5,
-                                        height: size.width * 0.5,
-                                        color: Colors.grey[300],
-                                        child: Icon(Icons.broken_image,
-                                            size: 50, color: Colors.grey),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                      ),
-                    );
+                    if (chatProvider.messages[index].messageType ==
+                        MessageType.text) {
+                      return _buildTextMessage(
+                          content: chatProvider.messages[index].content,
+                          isAuthMessage: isAuthMessage,
+                          textType: chatProvider.messages[index].messageType,
+                          context: context);
+                    }
+                    if (chatProvider.messages[index].messageType ==
+                        MessageType.image) {
+                      return _buildImageMessage(
+                          content: chatProvider.messages[index].content,
+                          isAuthMessage: isAuthMessage,
+                          textType: chatProvider.messages[index].messageType,
+                          context: context);
+                    }
+                    if (chatProvider.messages[index].messageType ==
+                        MessageType.reactPost) {
+                      return _buildReactPostMessage(
+                          contentReactPost:
+                              chatProvider.messages[index].contentReactPost!,
+                          content: chatProvider.messages[index].content,
+                          isAuthMessage: isAuthMessage,
+                          textType: chatProvider.messages[index].messageType,
+                          context: context);
+                    }
                   },
                   separatorBuilder: (context, index) => SizedBox(height: 4.0),
                 );
@@ -300,6 +244,150 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildContainerMessage({
+    required Widget child,
+    required bool isAuthMessage,
+    required MessageType textType,
+    required BuildContext context,
+  }) {
+    final size = MediaQuery.of(context).size;
+    return Align(
+      alignment: isAuthMessage ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        constraints: BoxConstraints(maxWidth: size.width * 0.7),
+        margin: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+        padding: textType == MessageType.text
+            ? EdgeInsets.symmetric(
+                vertical: 8.0,
+                horizontal: 12.0,
+              )
+            : EdgeInsets.all(4.0),
+        decoration: BoxDecoration(
+          color: isAuthMessage ? Colors.blue[100] : Colors.grey[200],
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4.0,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildTextMessage({
+    required String content,
+    required bool isAuthMessage,
+    required MessageType textType,
+    required BuildContext context,
+  }) {
+    return _buildContainerMessage(
+      isAuthMessage: isAuthMessage,
+      textType: textType,
+      context: context,
+      child: Text(
+        content,
+        style: TextStyle(
+          color: isAuthMessage ? Colors.black87 : Colors.black54,
+          fontSize: 16.0,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageMessage({
+    required String content,
+    required bool isAuthMessage,
+    required MessageType textType,
+    required BuildContext context,
+  }) {
+    final size = MediaQuery.of(context).size;
+    return _buildContainerMessage(
+      isAuthMessage: isAuthMessage,
+      textType: textType,
+      context: context,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ImageViewPage(
+                imageUrl: content,
+              ),
+            ),
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: Image.network(
+            content,
+            width: textType == MessageType.image
+                ? size.width * 0.5
+                : size.width * 0.25,
+            height: textType == MessageType.image
+                ? size.width * 0.5
+                : size.width * 0.25,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) {
+                return child;
+              }
+              return Container(
+                decoration: BoxDecoration(),
+                width: textType == MessageType.image
+                    ? size.width * 0.5
+                    : size.width * 0.25,
+                height: textType == MessageType.image
+                    ? size.width * 0.5
+                    : size.width * 0.25,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: textType == MessageType.image
+                    ? size.width * 0.5
+                    : size.width * 0.25,
+                height: textType == MessageType.image
+                    ? size.width * 0.5
+                    : size.width * 0.25,
+                color: Colors.grey[300],
+                child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReactPostMessage({
+    required String content,
+    required String contentReactPost,
+    required bool isAuthMessage,
+    required MessageType textType,
+    required BuildContext context,
+  }) {
+    return Stack(
+      alignment: AlignmentDirectional.bottomEnd,
+      children: [
+        _buildImageMessage(
+            content: content,
+            isAuthMessage: isAuthMessage,
+            textType: textType,
+            context: context),
+        _buildTextMessage(
+            content: contentReactPost,
+            isAuthMessage: isAuthMessage,
+            textType: textType,
+            context: context),
+      ],
     );
   }
 }

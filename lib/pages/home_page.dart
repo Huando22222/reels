@@ -8,14 +8,18 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 import 'package:reels/config/app_route.dart';
+import 'package:reels/const/app_colors.dart';
 import 'package:reels/pages/camera_review_page.dart';
 import 'package:reels/pages/chat_list_page.dart';
+import 'package:reels/providers/chat_provider.dart';
 import 'package:reels/providers/post_provider.dart';
 import 'package:reels/providers/user_provider.dart';
 import 'package:reels/services/utils_service.dart';
 import 'package:reels/widgets/avatar_widget.dart';
+import 'package:reels/widgets/gradient_background.dart';
 import 'package:reels/widgets/icon_button_widget.dart';
 import 'package:reels/widgets/post_widget.dart';
+import 'package:reels/widgets/surface_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -161,256 +165,326 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        leadingWidth: 70,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 20),
-          child: AvatarWidget(
-            pathImage: context.read<UserProvider>().userData!.image,
-            onTap: () {
-              Navigator.of(context).pushNamed(AppRoute.profile);
-            },
-            size: 50,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: GradientBackground(),
           ),
-        ),
-        actions: [
-          IconButtonWidget(
-            hugeIcon: HugeIcons.strokeRoundedSearch01,
-            onTap: () {
-              Navigator.of(context).pushNamed(AppRoute.search);
-            },
-          ),
-          IconButtonWidget(
-            hugeIcon: HugeIcons.strokeRoundedNotification01,
-            onTap: () {
-              Navigator.of(context).pushNamed(AppRoute.notification);
-            },
-          ),
-        ],
-      ),
-      extendBodyBehindAppBar: true,
-      body: PageView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: 2,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return Consumer<PostProvider>(
-              builder: (context, value, child) {
-                return Stack(
-                  children: [
-                    PageView.builder(
-                      controller: _pageCameraController,
-                      scrollDirection: Axis.vertical,
-                      itemCount: value.listPosts.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return CameraReviewPage(
-                            cameraController: _cameraController,
-                            cameras: _cameras,
-                            onCameraSwitch: _updateCameraController,
-                          );
-                        }
-                        if (value.listPosts.isNotEmpty) {
-                          return PostWidget(
-                            post: value.listPosts[index - 1],
-                          );
-                        } else {
-                          return const Center(
-                              child: Text("No posts available"));
-                        }
-                      },
-                    ),
-                    ValueListenableBuilder(
-                        valueListenable: _currentHorizontalPageNotifier,
-                        builder: (context, isFocused, child) {
-                          final currentPage =
-                              _pageCameraController.page?.round() ?? 0;
-                          if (currentPage == 0) {
-                            return const SizedBox.shrink();
-                          }
-                          return ValueListenableBuilder(
-                            valueListenable: _isFocusedTextField,
-                            builder: (context, isFocused, child) {
-                              return Stack(
-                                children: [
-                                  if (isFocused)
-                                    GestureDetector(
-                                      onTap: () {
-                                        _focusNode.unfocus();
-                                      },
-                                      child: BackdropFilter(
-                                        filter: ImageFilter.blur(
-                                          sigmaX: 1,
-                                          sigmaY: 1,
-                                        ),
-                                        child: Container(
-                                          color: Colors.black.withAlpha(150),
-                                        ),
-                                      ),
-                                    ),
-                                  Positioned(
-                                    bottom: MediaQuery.of(context)
-                                            .viewInsets
-                                            .bottom +
-                                        10,
-                                    left: 0,
-                                    right: 0,
-                                    child: Column(
+          Positioned(
+            child: PageView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 2,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Consumer<PostProvider>(
+                    builder: (context, value, child) {
+                      return Stack(
+                        children: [
+                          PageView.builder(
+                            controller: _pageCameraController,
+                            scrollDirection: Axis.vertical,
+                            itemCount: value.listPosts.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == 0) {
+                                return CameraReviewPage(
+                                  cameraController: _cameraController,
+                                  cameras: _cameras,
+                                  onCameraSwitch: _updateCameraController,
+                                );
+                              }
+                              if (value.listPosts.isNotEmpty) {
+                                return PostWidget(
+                                  post: value.listPosts[index - 1],
+                                );
+                              } else {
+                                return const Center(
+                                    child: Text("No posts available"));
+                              }
+                            },
+                          ),
+                          ValueListenableBuilder(
+                              valueListenable: _currentHorizontalPageNotifier,
+                              builder: (context, isFocused, child) {
+                                final currentPage =
+                                    _pageCameraController.page?.round() ?? 0;
+                                if (currentPage == 0) {
+                                  return const SizedBox.shrink();
+                                }
+                                return ValueListenableBuilder(
+                                  valueListenable: _isFocusedTextField,
+                                  builder: (context, isFocused, child) {
+                                    return Stack(
                                       children: [
-                                        ValueListenableBuilder(
-                                          valueListenable: _canShowCommentBox,
-                                          builder: (context, value, child) {
-                                            if (value == false) {
-                                              return SizedBox.shrink();
-                                            }
-                                            return Container(
-                                              decoration: BoxDecoration(
-                                                border: Border.all(),
-                                                borderRadius:
-                                                    BorderRadius.circular(25),
+                                        if (isFocused)
+                                          GestureDetector(
+                                            onTap: () {
+                                              _focusNode.unfocus();
+                                            },
+                                            child: BackdropFilter(
+                                              filter: ImageFilter.blur(
+                                                sigmaX: 1,
+                                                sigmaY: 1,
+                                              ),
+                                              child: Container(
                                                 color:
-                                                    Colors.grey.withAlpha(100),
+                                                    Colors.black.withAlpha(150),
                                               ),
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.8,
-                                              height: 50,
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 10),
-                                              child: ValueListenableBuilder<
-                                                  String>(
-                                                valueListenable:
-                                                    _hintTextNotifier,
-                                                builder:
-                                                    (context, hintText, child) {
-                                                  return ValueListenableBuilder<
-                                                      bool>(
-                                                    valueListenable:
-                                                        _hasTextInComment,
-                                                    builder: (context, hasText,
-                                                        child) {
-                                                      return TextField(
-                                                        focusNode: _focusNode,
-                                                        controller:
-                                                            _commentController,
-                                                        onSubmitted: (value) {
-                                                          _focusNode.unfocus();
-                                                        },
-                                                        textInputAction:
-                                                            TextInputAction
-                                                                .done,
-                                                        style: TextStyle(
-                                                          color: _isFocusedTextField
-                                                                  .value
-                                                              ? Colors.white
-                                                              : Colors
-                                                                  .grey, // Màu chữ
-                                                        ),
-                                                        cursorColor:
-                                                            _isFocusedTextField
-                                                                    .value
-                                                                ? Colors.white
-                                                                : Colors.grey,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          hintText: hintText,
-                                                          border:
-                                                              InputBorder.none,
-                                                          hintStyle: TextStyle(
-                                                              color:
-                                                                  Colors.grey),
-                                                          suffixIcon: hasText
-                                                              ? IconButtonWidget(
-                                                                  onTap: () {},
-                                                                  hugeIcon:
-                                                                      HugeIcons
-                                                                          .strokeRoundedSent,
-                                                                  color: Colors
-                                                                      .blue,
-                                                                )
-                                                              : null,
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                },
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                        if (!isFocused)
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
+                                            ),
+                                          ),
+                                        Positioned(
+                                          bottom: MediaQuery.of(context)
+                                                  .viewInsets
+                                                  .bottom +
+                                              10,
+                                          left: 0,
+                                          right: 0,
+                                          child: Column(
                                             children: [
-                                              IconButtonWidget(
-                                                hugeIcon: HugeIcons
-                                                    .strokeRoundedArtboard,
-                                              ),
-                                              InkWell(
-                                                onTap: () {
-                                                  _pageCameraController
-                                                      .animateTo(
-                                                    0,
-                                                    duration: const Duration(
-                                                        milliseconds: 500),
-                                                    curve: Curves.easeInOut,
+                                              ValueListenableBuilder(
+                                                valueListenable:
+                                                    _canShowCommentBox,
+                                                builder:
+                                                    (context, value, child) {
+                                                  if (value == false) {
+                                                    return SizedBox.shrink();
+                                                  }
+                                                  return Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              25),
+                                                      color: Colors.grey
+                                                          .withAlpha(100),
+                                                    ),
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.8,
+                                                    height: 50,
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 10),
+                                                    child:
+                                                        ValueListenableBuilder<
+                                                            String>(
+                                                      valueListenable:
+                                                          _hintTextNotifier,
+                                                      builder: (context,
+                                                          hintText, child) {
+                                                        return ValueListenableBuilder<
+                                                            bool>(
+                                                          valueListenable:
+                                                              _hasTextInComment,
+                                                          builder: (context,
+                                                              hasText, child) {
+                                                            return TextField(
+                                                              focusNode:
+                                                                  _focusNode,
+                                                              controller:
+                                                                  _commentController,
+                                                              onSubmitted:
+                                                                  (value) {
+                                                                _focusNode
+                                                                    .unfocus();
+                                                              },
+                                                              textInputAction:
+                                                                  TextInputAction
+                                                                      .done,
+                                                              style: TextStyle(
+                                                                color: _isFocusedTextField
+                                                                        .value
+                                                                    ? Colors
+                                                                        .white
+                                                                    : Colors
+                                                                        .grey,
+                                                              ),
+                                                              cursorColor:
+                                                                  _isFocusedTextField
+                                                                          .value
+                                                                      ? Colors
+                                                                          .white
+                                                                      : Colors
+                                                                          .grey,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                hintText:
+                                                                    hintText,
+                                                                border:
+                                                                    InputBorder
+                                                                        .none,
+                                                                hintStyle: TextStyle(
+                                                                    color: Colors
+                                                                        .grey),
+                                                                suffixIcon: hasText
+                                                                    ? IconButtonWidget(
+                                                                        onTap:
+                                                                            () async {
+                                                                          final res = await context.read<ChatProvider>().addTextReactPost(
+                                                                              content: context.read<PostProvider>().listPosts[currentPage - 1].image,
+                                                                              contentReactPost: _commentController.text,
+                                                                              receiverId: context.read<PostProvider>().listPosts[currentPage - 1].owner.uid);
+                                                                          if (res) {
+                                                                            UtilsService.showSnackBar(
+                                                                                context: context,
+                                                                                content: "has sent react");
+                                                                            _commentController.clear();
+                                                                            _focusNode.unfocus();
+                                                                          }
+                                                                        },
+                                                                        hugeIcon:
+                                                                            HugeIcons.strokeRoundedSent,
+                                                                        color: Colors
+                                                                            .blue,
+                                                                      )
+                                                                    : null,
+                                                              ),
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                    ),
                                                   );
                                                 },
-                                                borderRadius:
-                                                    BorderRadius.circular(30),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      10.0),
-                                                  child: Container(
-                                                    height: 60,
-                                                    width: 60,
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.grey,
-                                                      shape: BoxShape.circle,
-                                                      border: Border.all(
-                                                        color: Colors.red,
-                                                        width: 4,
+                                              ),
+                                              if (!isFocused)
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceAround,
+                                                  children: [
+                                                    IconButtonWidget(
+                                                      hugeIcon: HugeIcons
+                                                          .strokeRoundedArtboard,
+                                                    ),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        _pageCameraController
+                                                            .animateTo(
+                                                          0,
+                                                          duration:
+                                                              const Duration(
+                                                                  milliseconds:
+                                                                      500),
+                                                          curve:
+                                                              Curves.easeInOut,
+                                                        );
+                                                      },
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              30),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(10.0),
+                                                        child: Container(
+                                                          height: 60,
+                                                          width: 60,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors.grey,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            border: Border.all(
+                                                              color: Colors.red,
+                                                              width: 4,
+                                                            ),
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
+                                                    IconButtonWidget(
+                                                      hugeIcon: HugeIcons
+                                                          .strokeRoundedDownload04,
+                                                      color: Colors.grey,
+                                                      onTap: () {
+                                                        UtilsService.saveImageFromUrl(
+                                                            context: context,
+                                                            url: context
+                                                                .read<
+                                                                    PostProvider>()
+                                                                .listPosts[
+                                                                    _currentHorizontalPageNotifier
+                                                                            .value -
+                                                                        1]
+                                                                .image);
+                                                      },
+                                                      size: 32.0,
+                                                    ),
+                                                  ],
                                                 ),
-                                              ),
-                                              IconButtonWidget(
-                                                hugeIcon: HugeIcons
-                                                    .strokeRoundedDownload04,
-                                                color: Colors.grey,
-                                                onTap: () {
-                                                  UtilsService.saveImageFromUrl(
-                                                      context: context,
-                                                      url: context
-                                                          .read<PostProvider>()
-                                                          .listPosts[
-                                                              _currentHorizontalPageNotifier
-                                                                      .value -
-                                                                  1]
-                                                          .image);
-                                                },
-                                                size: 32.0,
-                                              ),
                                             ],
                                           ),
+                                        ),
                                       ],
+                                    );
+                                  },
+                                );
+                              }),
+                          Positioned(
+                            top: MediaQuery.of(context).padding.top,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                left: 20,
+                                right: 20,
+                              ),
+                              color: Colors.transparent,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SurfaceWidget(
+                                    child: AvatarWidget(
+                                      pathImage: context
+                                          .read<UserProvider>()
+                                          .userData!
+                                          .image,
+                                      onTap: () {
+                                        Navigator.of(context)
+                                            .pushNamed(AppRoute.profile);
+                                      },
+                                      size: 50,
                                     ),
                                   ),
+                                  Row(
+                                    children: [
+                                      SurfaceWidget(
+                                        child: IconButtonWidget(
+                                          hugeIcon:
+                                              HugeIcons.strokeRoundedSearch01,
+                                          onTap: () {
+                                            Navigator.of(context)
+                                                .pushNamed(AppRoute.search);
+                                          },
+                                        ),
+                                      ),
+                                      IconButtonWidget(
+                                        hugeIcon: HugeIcons
+                                            .strokeRoundedNotification01,
+                                        onTap: () {
+                                          Navigator.of(context)
+                                              .pushNamed(AppRoute.notification);
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ],
-                              );
-                            },
-                          );
-                        }),
-                  ],
-                );
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+                return const ChatListPage();
               },
-            );
-          }
-          return const ChatListPage();
-        },
+            ),
+          ),
+        ],
       ),
     );
   }

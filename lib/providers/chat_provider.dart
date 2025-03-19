@@ -96,6 +96,28 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> addTextReactPost({
+    required String content,
+    required String contentReactPost,
+    required String receiverId,
+  }) async {
+    try {
+      final message = MessageModel(
+        content: content,
+        contentReactPost: contentReactPost,
+        sentTime: DateTime.now(),
+        receiverId: receiverId,
+        messageType: MessageType.reactPost,
+        senderId: FirebaseAuth.instance.currentUser!.uid,
+      );
+
+      await _addMessageToChat(receiverId, message);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> _addMessageToChat(
     String receiverId,
     MessageModel message,

@@ -20,7 +20,10 @@ class ChatListPage extends StatelessWidget {
               String content =
                   value.chatList[index].message.messageType == MessageType.text
                       ? value.chatList[index].message.content
-                      : "Sent a image";
+                      : value.chatList[index].message.messageType ==
+                              MessageType.text
+                          ? "Sent a image"
+                          : "sent a react post";
               if (userData!.uid == value.chatList[index].message.senderId) {
                 content = "You: $content";
               }
@@ -34,7 +37,6 @@ class ChatListPage extends StatelessWidget {
                 title: Text(value.chatList[index].user.name),
                 leading: AvatarWidget(
                   pathImage: value.chatList[index].user.image,
-                  isCircle: true,
                   size: 50,
                 ),
                 subtitle: Row(

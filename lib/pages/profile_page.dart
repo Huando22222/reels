@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
@@ -54,7 +53,10 @@ class ProfilePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text("${userData.friends.length}/20 Friends"),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Text("${userData.friends.length} Friends"),
+                ),
                 _buildBadge(
                   icon: HugeIcons.strokeRoundedShare01,
                   title: 'Find friends from other apps',
@@ -117,6 +119,7 @@ class ProfilePage extends StatelessWidget {
                     ],
                   ),
                 ),
+                SizedBox(height: 20),
                 _buildBadge(
                   icon: HugeIcons.strokeRoundedUserMultiple02,
                   title: 'Friends',
@@ -137,6 +140,7 @@ class ProfilePage extends StatelessWidget {
                     );
                   },
                 ),
+                SizedBox(height: 20),
                 _buildBadge(
                   icon: HugeIcons.strokeRoundedUserAdd02,
                   title: 'Friends request',
@@ -186,7 +190,6 @@ class ProfilePage extends StatelessWidget {
 
     return ScreenWrapperWidget(
       showBackButton: true,
-      title: "Profile",
       actions: [
         if (otherUserData == null) ...[
           IconButtonWidget(
@@ -335,6 +338,7 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildBadge({required IconData icon, required String title}) {
     return Row(
+      spacing: 10,
       children: [
         HugeIcon(
           icon: icon, //HugeIcons.strokeRoundedShare01,

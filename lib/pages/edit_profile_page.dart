@@ -116,7 +116,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             pathImage: userProvider.userData!.image,
             imageFile: _imageFile,
             size: 150,
-            isCircle: true,
             onTap: _pickImage,
           ),
           const SizedBox(height: 20),
