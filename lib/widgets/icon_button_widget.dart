@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -37,7 +36,7 @@ class IconButtonWidget extends StatelessWidget {
             ),
         child: HugeIcon(
           icon: hugeIcon,
-          color: color ?? Colors.black,
+          color: color ?? Theme.of(context).colorScheme.onSurface,
           size: iconSize,
         ),
       ),

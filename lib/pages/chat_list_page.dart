@@ -5,6 +5,7 @@ import 'package:reels/models/message.dart';
 import 'package:reels/providers/chat_list_provider.dart';
 import 'package:reels/providers/user_provider.dart';
 import 'package:reels/widgets/avatar_widget.dart';
+import 'package:reels/widgets/surface_widget.dart';
 
 class ChatListPage extends StatelessWidget {
   const ChatListPage({super.key});
@@ -34,10 +35,15 @@ class ChatListPage extends StatelessWidget {
                     arguments: value.chatList[index].user,
                   );
                 },
-                title: Text(value.chatList[index].user.name),
-                leading: AvatarWidget(
-                  pathImage: value.chatList[index].user.image,
-                  size: 50,
+                title: Text(
+                  value.chatList[index].user.name,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                leading: SurfaceWidget(
+                  child: AvatarWidget(
+                    pathImage: value.chatList[index].user.image,
+                    size: 50,
+                  ),
                 ),
                 subtitle: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -47,10 +53,12 @@ class ChatListPage extends StatelessWidget {
                         content,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
                     Text(
                       '${value.chatList[index].message.sentTime.hour.toString().padLeft(2, '0')}:${value.chatList[index].message.sentTime.minute.toString().padLeft(2, '0')}',
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -63,7 +71,10 @@ class ChatListPage extends StatelessWidget {
           );
         } else {
           return Center(
-            child: Text("dont have any message yet!"),
+            child: Text(
+              "dont have any message yet!",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           );
         }
       },

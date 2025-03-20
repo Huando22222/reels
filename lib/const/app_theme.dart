@@ -33,7 +33,7 @@ class AppTheme {
       primary: AppColors.lightPrimary,
       secondary: AppColors.lightSecondary,
       surface: AppColors.lightSurface,
-      onSurface: AppColors.lightTextPrimary,
+      onSurface: AppColors.lightOnSurface,
       error: AppColors.lightError,
       onPrimary: Colors.white,
       onSecondary: Colors.black,
@@ -57,10 +57,13 @@ class AppTheme {
           TextStyle(fontSize: AppValue.size.xxl, color: AppColors.darkAccent),
       titleMedium:
           TextStyle(fontSize: AppValue.size.xl, color: AppColors.darkAccent),
+      //title content
       bodyLarge: TextStyle(
           fontSize: AppValue.size.l, color: AppColors.darkTextPrimary),
+      //content
       bodyMedium: TextStyle(
           fontSize: AppValue.size.m, color: AppColors.darkTextPrimary),
+      //description
       bodySmall: TextStyle(
           fontSize: AppValue.size.s, color: AppColors.darkTextSecondary),
     ),
@@ -71,7 +74,7 @@ class AppTheme {
       error: AppColors.darkError,
       onPrimary: Colors.black,
       onSecondary: Colors.black,
-      onSurface: AppColors.darkTextPrimary,
+      onSurface: AppColors.darkOnSurface,
       onError: Colors.black,
     ),
   );

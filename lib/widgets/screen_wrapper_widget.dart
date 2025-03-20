@@ -2,10 +2,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:reels/widgets/gradient_background.dart';
 
 class ScreenWrapperWidget extends StatelessWidget {
   final Widget child;
   final bool showBackButton;
+  final bool extendBodyBehindAppBar;
   final Widget? leadingWidget;
   final Widget? bottomSheet;
   final String? title;
@@ -15,6 +17,7 @@ class ScreenWrapperWidget extends StatelessWidget {
     super.key,
     required this.child,
     this.showBackButton = true,
+    this.extendBodyBehindAppBar = false,
     this.leadingWidget,
     this.bottomSheet,
     this.title,
@@ -28,29 +31,18 @@ class ScreenWrapperWidget extends StatelessWidget {
     return Scaffold(
       bottomSheet: bottomSheet,
       extendBody: false,
-      extendBodyBehindAppBar: false,
+      extendBodyBehindAppBar: extendBodyBehindAppBar,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black,
-                Colors.red,
-              ],
-            ),
-          ),
-        ),
+        // flexibleSpace: GradientBackground(),
         leading: showBackButton
             ? (Navigator.canPop(context)
                 ? GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: HugeIcon(
                       icon: HugeIcons.strokeRoundedLinkBackward,
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 24.0,
                     ),
                   )
@@ -70,18 +62,7 @@ class ScreenWrapperWidget extends StatelessWidget {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black,
-                      const Color.fromARGB(118, 0, 0, 0),
-                      Colors.red,
-                    ],
-                  ),
-                ),
-              ),
+              child: GradientBackground(),
             ),
           ),
           GestureDetector(

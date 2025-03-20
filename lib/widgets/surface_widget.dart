@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class SurfaceWidget extends StatelessWidget {
   final double? width;
   final Widget child;
-  const SurfaceWidget({super.key, this.width = 4, required this.child});
+  const SurfaceWidget({super.key, this.width = 2, required this.child});
 
   @override
   Widget build(BuildContext context) {

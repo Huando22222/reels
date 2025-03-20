@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:reels/providers/post_provider.dart';
 import 'package:reels/services/utils_service.dart';
 import 'package:reels/widgets/icon_button_widget.dart';
+import 'package:reels/widgets/surface_widget.dart';
 
 class CameraReviewPage extends StatefulWidget {
   final CameraController? cameraController;
@@ -40,7 +41,7 @@ class _CameraReviewPageState extends State<CameraReviewPage> {
             height: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               border: Border.all(
-                color: Colors.blue,
+                color: Theme.of(context).colorScheme.primary,
                 width: 2.0,
               ),
               borderRadius: BorderRadius.circular(8),
@@ -62,7 +63,6 @@ class _CameraReviewPageState extends State<CameraReviewPage> {
             right: 20,
             child: IconButtonWidget(
               hugeIcon: HugeIcons.strokeRoundedExchange01,
-              color: Colors.grey,
               onTap: _switchCamera,
               size: 32.0,
             ),
@@ -77,34 +77,35 @@ class _CameraReviewPageState extends State<CameraReviewPage> {
               if (_capturedImage != null) ...[
                 IconButtonWidget(
                   hugeIcon: HugeIcons.strokeRoundedImageDelete01,
-                  color: Colors.grey,
                   onTap: _resetCamera,
                   size: 32.0,
                 ),
-                IconButtonWidget(
-                  hugeIcon: HugeIcons.strokeRoundedSent,
-                  color: Colors.grey,
-                  onTap: () async {
-                    if (_isUploading) return;
-                    _isUploading = true;
-                    final result = await context
-                        .read<PostProvider>()
-                        .createPost(
-                            imagePath: _capturedImage!.path, context: context);
-                    if (result) {
-                      UtilsService.showSnackBar(
-                        context: context,
-                        content: 'post success!',
-                      );
-                      _resetCamera();
-                    }
-                    _isUploading = false;
-                  },
-                  size: 32.0,
+                SurfaceWidget(
+                  width: 4,
+                  child: IconButtonWidget(
+                    hugeIcon: HugeIcons.strokeRoundedSent,
+                    onTap: () async {
+                      if (_isUploading) return;
+                      _isUploading = true;
+                      final result = await context
+                          .read<PostProvider>()
+                          .createPost(
+                              imagePath: _capturedImage!.path,
+                              context: context);
+                      if (result) {
+                        UtilsService.showSnackBar(
+                          context: context,
+                          content: 'post success!',
+                        );
+                        _resetCamera();
+                      }
+                      _isUploading = false;
+                    },
+                    size: 32.0,
+                  ),
                 ),
                 IconButtonWidget(
                   hugeIcon: HugeIcons.strokeRoundedDownload04,
-                  color: Colors.grey,
                   onTap: () {
                     UtilsService.saveImage(
                       context: context,
@@ -119,15 +120,18 @@ class _CameraReviewPageState extends State<CameraReviewPage> {
                   borderRadius: BorderRadius.circular(30),
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
-                    child: Container(
-                      height: 60,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.red,
-                          width: 4,
+                    child: SurfaceWidget(
+                      width: 4,
+                      child: Container(
+                        height: 60,
+                        width: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          // color: Colors.grey,
+                          // border: Border.all(
+                          //   color: Colors.red,
+                          //   width: 4,
+                          // ),
                         ),
                       ),
                     ),

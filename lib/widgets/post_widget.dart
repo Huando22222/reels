@@ -64,9 +64,11 @@ class PostWidget extends StatelessWidget {
                             : post.owner.name,
                         maxLines: 1,
                         overflow: TextOverflow.clip,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       Text(
                         UtilsService.formatTime(post.createdAt),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),

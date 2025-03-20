@@ -450,6 +450,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     ),
                                   ),
                                   Row(
+                                    spacing: 10,
                                     children: [
                                       SurfaceWidget(
                                         child: IconButtonWidget(
@@ -461,13 +462,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                           },
                                         ),
                                       ),
-                                      IconButtonWidget(
-                                        hugeIcon: HugeIcons
-                                            .strokeRoundedNotification01,
-                                        onTap: () {
-                                          Navigator.of(context)
-                                              .pushNamed(AppRoute.notification);
-                                        },
+                                      SurfaceWidget(
+                                        child: IconButtonWidget(
+                                          hugeIcon: HugeIcons
+                                              .strokeRoundedNotification01,
+                                          onTap: () {
+                                            Navigator.of(context).pushNamed(
+                                                AppRoute.notification);
+                                          },
+                                        ),
                                       ),
                                     ],
                                   ),

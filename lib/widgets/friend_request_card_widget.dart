@@ -17,19 +17,6 @@ class FriendRequestCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final FirebaseService firebaseService = FirebaseService();
 
-    // String formatTime(DateTime sentTime) {
-    //   final now = DateTime.now();
-    //   final difference = now.difference(sentTime);
-
-    //   if (difference.inMinutes < 60) {
-    //     return "${difference.inMinutes} m ago";
-    //   } else if (difference.inHours < 24) {
-    //     return "${difference.inHours} h ago";
-    //   } else {
-    //     return "${difference.inDays} d ago";
-    //   }
-    // }
-
     Future<void> handleAddFriend() async {
       try {
         final success = await firebaseService.handleFriendRequest(
@@ -41,18 +28,15 @@ class FriendRequestCardWidget extends StatelessWidget {
             notificationId: notification.id,
             isRead: true,
           );
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Friend request accepted!")),
-          );
+          UtilsService.showSnackBar(
+              context: context, content: "Friend request accepted!");
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to accept request")),
-          );
+          UtilsService.showSnackBar(
+              context: context, content: "Failed to accept request");
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to accept request")),
-        );
+        UtilsService.showSnackBar(
+            context: context, content: "Failed to accept request");
       }
     }
 
@@ -66,14 +50,12 @@ class FriendRequestCardWidget extends StatelessWidget {
           await firebaseService.updateNotificationStatus(
               isRead: true, notificationId: notification.id);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to decline request")),
-          );
+          UtilsService.showSnackBar(
+              context: context, content: "Failed to decline request");
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to decline request")),
-        );
+        UtilsService.showSnackBar(
+            context: context, content: "Failed to decline request");
       }
     }
 
@@ -86,11 +68,11 @@ class FriendRequestCardWidget extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.shade300,
+              color: Theme.of(context).colorScheme.surface.withAlpha(100),
               spreadRadius: 2,
               blurRadius: 5,
               offset: const Offset(0, 3),
@@ -114,23 +96,15 @@ class FriendRequestCardWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
-                          notification.sender.name,
-                          maxLines: 2,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
-                          ),
-                        ),
+                        child: Text(notification.sender.name,
+                            maxLines: 2,
+                            style: Theme.of(context).textTheme.bodyLarge),
                       ),
                       const SizedBox(height: 4.0),
                       Text(
                         UtilsService.formatTime(notification.sentTime),
                         maxLines: 2,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12.0,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
@@ -141,23 +115,28 @@ class FriendRequestCardWidget extends StatelessWidget {
                         ElevatedButton(
                           onPressed: () => handleAddFriend(),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            // backgroundColor: Colors.blue,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.0),
                             ),
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 16.0),
                           ),
-                          child: const Text(
+                          child: Text(
                             "Add",
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8.0),
                         OutlinedButton(
                           onPressed: () => handleCancel(),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.grey[400]!),
+                            side: BorderSide(
+                                color: Theme.of(context).colorScheme.secondary),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.0),
                             ),
@@ -166,16 +145,18 @@ class FriendRequestCardWidget extends StatelessWidget {
                           ),
                           child: Text(
                             "Decline",
-                            style: TextStyle(color: Colors.grey[800]),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                            ),
                           ),
                         ),
                       ],
                     )
                   else
-                    const Text(
+                    Text(
                       "Processed",
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontStyle: FontStyle.italic,
                       ),
                     )

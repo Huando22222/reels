@@ -39,18 +39,21 @@ class AvatarWidget extends StatelessWidget {
                     height: size ?? dv.width * 0.08,
                     width: size ?? dv.width * 0.08,
                     errorBuilder: (context, error, stackTrace) {
-                      return _buildDefaultAvatar(dv);
+                      return _buildDefaultAvatar(dv: dv, context: context);
                     },
                   )
-                : _buildDefaultAvatar(dv)),
+                : _buildDefaultAvatar(dv: dv, context: context)),
       ),
     );
   }
 
-  Widget _buildDefaultAvatar(Size dv) {
-    return IconButtonWidget(
+  Widget _buildDefaultAvatar(
+      {required Size dv, required BuildContext context}) {
+    return HugeIcon(
+      icon: HugeIcons.strokeRoundedUser,
+      // icon: HugeIcons.strokeRoundedUserSquare,
+      color: Theme.of(context).colorScheme.onSurface,
       size: size ?? dv.width * 0.08,
-      hugeIcon: HugeIcons.strokeRoundedUserSquare,
     );
   }
 }

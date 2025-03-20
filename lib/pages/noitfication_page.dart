@@ -12,9 +12,10 @@ class NotificationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenWrapperWidget(
+      extendBodyBehindAppBar: false,
       showBackButton: true,
       child: Container(
-        decoration: BoxDecoration(color: Colors.amber),
+        decoration: BoxDecoration(),
         child: Consumer<NotificationProvider>(
           builder: (context, value, child) {
             return ListView.separated(

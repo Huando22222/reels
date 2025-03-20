@@ -40,7 +40,7 @@ class UtilsService {
             if (icon != null) ...[
               Icon(
                 icon,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.primary,
                 size: 24,
               ),
               const SizedBox(width: 10),
@@ -48,11 +48,7 @@ class UtilsService {
             Expanded(
               child: Text(
                 content,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
           ],
