@@ -1,15 +1,18 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
-import 'package:reels/const/app_colors.dart';
 import 'package:reels/models/response.dart';
+import 'package:reels/providers/app_settings_provider.dart';
 import 'package:reels/providers/user_provider.dart';
 import 'package:reels/services/firebase_service.dart';
 import 'package:reels/services/image_service.dart';
+import 'package:reels/services/utils_service.dart';
 import 'package:reels/widgets/avatar_widget.dart';
 import 'package:reels/widgets/icon_button_widget.dart';
+import 'package:reels/widgets/loading_widget.dart';
 import 'package:reels/widgets/screen_wrapper_widget.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -65,25 +68,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
           await _authService.upsertUser(user: updatedUser);
       if (res.success) {
         await userProvider.getUserData();
-        _showSnackBar(res.msg, isError: false);
+        UtilsService.showSnackBar(context: context, content: res.msg);
       } else {
-        _showSnackBar(res.msg, isError: true);
+        UtilsService.showSnackBar(
+            context: context, content: res.msg, isError: true);
       }
     } catch (e) {
-      _showSnackBar("An error occurred: $e", isError: true);
+      UtilsService.showSnackBar(
+          context: context, content: "An error occurred: $e", isError: true);
     } finally {
       setState(() => _isUpdating = false);
     }
-  }
-
-  void _showSnackBar(String message, {required bool isError}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? AppColors.darkError : null,
-        duration: const Duration(seconds: 3),
-      ),
-    );
   }
 
   void _pickImage() {
@@ -109,59 +104,82 @@ class _EditProfilePageState extends State<EditProfilePage> {
           color: _isUpdating ? Colors.grey : null,
         ),
       ],
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-          AvatarWidget(
-            pathImage: userProvider.userData!.image,
-            imageFile: _imageFile,
-            size: 150,
-            onTap: _pickImage,
-          ),
-          const SizedBox(height: 20),
-          ValueListenableBuilder<bool>(
-            valueListenable: _isNameEmpty,
-            builder: (context, isEmpty, child) {
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: isEmpty ? AppColors.darkError : Colors.grey,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: Row(
-                  children: [
-                    const HugeIcon(
-                      icon: HugeIcons.strokeRoundedTag01,
-                      color: Colors.black,
-                      size: 24.0,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Enter your name",
-                        ),
-                        onChanged: (value) =>
-                            _isNameEmpty.value = value.isEmpty,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          if (_isUpdating)
-            const Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: CircularProgressIndicator(),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            Center(
+              child: AvatarWidget(
+                pathImage: userProvider.userData!.image,
+                imageFile: _imageFile,
+                size: 150,
+                onTap: _pickImage,
+              ),
             ),
-        ],
+            const SizedBox(height: 20),
+            ValueListenableBuilder<bool>(
+              valueListenable: _isNameEmpty,
+              builder: (context, isEmpty, child) {
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: isEmpty
+                          ? Theme.of(context).colorScheme.onError
+                          : Theme.of(context).colorScheme.surface,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  child: Row(
+                    children: [
+                      IconButtonWidget(
+                        hugeIcon: HugeIcons.strokeRoundedTag01,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Enter your name",
+                          ),
+                          onChanged: (value) =>
+                              _isNameEmpty.value = value.isEmpty,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 30),
+            Text(
+              "App settings",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Divider(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Dark Mode"),
+                Consumer<AppSettingsProvider>(
+                  builder: (context, appSettings, child) {
+                    return Switch(
+                      value: appSettings.themeMode == ThemeMode.dark,
+                      onChanged: (value) {
+                        appSettings.setThemeMode(
+                          value ? ThemeMode.dark : ThemeMode.light,
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

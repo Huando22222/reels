@@ -28,8 +28,12 @@ class UtilsService {
     SnackBarAction? action,
     bool isError = false,
   }) {
-    final effectiveBackgroundColor =
-        backgroundColor ?? (isError ? Colors.redAccent : Colors.grey.shade800);
+    // final effectiveBackgroundColor =
+    //     backgroundColor ?? (isError ? Colors.redAccent : Colors.grey.shade800);
+    final effectiveBackgroundColor = backgroundColor ??
+        (isError
+            ? Theme.of(context).colorScheme.error
+            : Theme.of(context).colorScheme.surface);
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -40,7 +44,9 @@ class UtilsService {
             if (icon != null) ...[
               Icon(
                 icon,
-                color: Theme.of(context).colorScheme.primary,
+                color: isError
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.secondary,
                 size: 24,
               ),
               const SizedBox(width: 10),
@@ -48,7 +54,11 @@ class UtilsService {
             Expanded(
               child: Text(
                 content,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: isError
+                    ? Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: Theme.of(context).colorScheme.onError,
+                        )
+                    : Theme.of(context).textTheme.bodyMedium,
               ),
             ),
           ],
@@ -107,5 +117,65 @@ class UtilsService {
         isError: true,
       );
     }
+  }
+
+  static Future<void> showConfirmationDialog({
+    required BuildContext context,
+    required String title,
+    String? content,
+    String confirmText = "Yes",
+    String declineText = "No",
+    required VoidCallback onConfirm,
+    required VoidCallback onDecline,
+    TextStyle? titleStyle,
+    TextStyle? contentStyle,
+    TextStyle? confirmStyle,
+    TextStyle? declineStyle,
+    Color? backgroundColor,
+  }) async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: backgroundColor,
+          title: Text(
+            title,
+            style: titleStyle ?? Theme.of(context).textTheme.bodyLarge,
+          ),
+          content: content != null
+              ? Text(
+                  content,
+                  style: contentStyle ?? Theme.of(context).textTheme.bodyMedium,
+                )
+              : null,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onConfirm();
+              },
+              child: Text(
+                confirmText,
+                style: confirmStyle ?? Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onDecline();
+              },
+              child: Text(
+                declineText,
+                style: declineStyle ??
+                    Theme.of(context)
+                        .textTheme
+                        .bodyLarge!
+                        .copyWith(color: Theme.of(context).colorScheme.primary),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

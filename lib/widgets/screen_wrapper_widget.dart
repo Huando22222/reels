@@ -26,8 +26,6 @@ class ScreenWrapperWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final size = MediaQuery.of(context).size;
-
     return Scaffold(
       bottomSheet: bottomSheet,
       extendBody: false,
@@ -57,20 +55,28 @@ class ScreenWrapperWidget extends StatelessWidget {
             : null,
         actions: actions,
       ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: GradientBackground(),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: GradientBackground(),
+              ),
             ),
-          ),
-          GestureDetector(
-              onTap: () {
-                FocusScope.of(context).unfocus();
-              },
-              child: child),
-        ],
+            SizedBox(
+              height: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: child,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

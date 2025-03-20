@@ -19,19 +19,19 @@ class AuthGatePage extends StatefulWidget {
 }
 
 class _AuthGatePageState extends State<AuthGatePage> {
-  bool isEmailVerified = false;
+  bool _isEmailVerified = false;
   final FirebaseService _authService = FirebaseService();
-  int sentEmailCount = 0;
-  Timer? timer;
-  final pushNotificationService = PushNotificationService();
+  int _sentEmailCount = 0;
+  Timer? _timer;
+  final _pushNotificationService = PushNotificationService();
 
   @override
   void initState() {
     log('===============================init auth gate');
     super.initState();
-    isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
-    pushNotificationService.firebaseNotification(context: context);
-    if (isEmailVerified) {
+    _isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
+    _pushNotificationService.firebaseNotification(context: context);
+    if (_isEmailVerified) {
       context.read<UserProvider>().addAllListeners(context: context);
     }
   }
@@ -47,12 +47,12 @@ class _AuthGatePageState extends State<AuthGatePage> {
   }
 
   Future checkEmailVerified() async {
-    isEmailVerified = await _authService.isVerified();
+    _isEmailVerified = await _authService.isVerified();
     if (!mounted) return;
     setState(() {});
 
-    if (isEmailVerified) {
-      timer?.cancel();
+    if (_isEmailVerified) {
+      _timer?.cancel();
     }
   }
 
@@ -63,13 +63,13 @@ class _AuthGatePageState extends State<AuthGatePage> {
 
   @override
   void dispose() {
-    timer?.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isEmailVerified) {
+    if (_isEmailVerified) {
       if (context.read<UserProvider>().isLoading) {
         return Scaffold(
           body: Center(
@@ -83,14 +83,16 @@ class _AuthGatePageState extends State<AuthGatePage> {
       }
     } else {
       return VerifiedEmail(
-        text: sentEmailCount == 0 ? "sent email" : "resent email",
+        color:
+            _sentEmailCount < 2 ? Theme.of(context).colorScheme.primary : null,
+        text: _sentEmailCount == 0 ? "sent email" : "resent email",
         onTap: () {
-          if (sentEmailCount < 1) {
-            if (!isEmailVerified) {
+          if (_sentEmailCount < 2) {
+            if (!_isEmailVerified) {
               sendVerificationEmail();
 
-              if (timer != null && timer!.isActive) timer?.cancel();
-              timer = Timer.periodic(
+              if (_timer != null && _timer!.isActive) _timer?.cancel();
+              _timer = Timer.periodic(
                 Duration(seconds: 3),
                 (timer) {
                   checkEmailVerified();
@@ -99,7 +101,7 @@ class _AuthGatePageState extends State<AuthGatePage> {
             }
           }
           setState(() {
-            sentEmailCount++;
+            _sentEmailCount++;
           });
           return;
         },

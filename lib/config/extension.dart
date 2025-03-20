@@ -5,4 +5,9 @@ extension StringExtensions on String {
     );
     return emailRegex.hasMatch(this);
   }
+
+  bool isValidPassword() {
+    return length >= 8;
+  }
 }
+  

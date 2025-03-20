@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
@@ -74,6 +72,7 @@ class _ChatPageState extends State<ChatPage> {
                 );
             if (success) {
               _pushNotificationService.sendNotificationToSelectedUser(
+                deviceToken: _otherUserData!.token,
                 context: context,
                 title: _otherUserData!.name,
                 body: "Sent an image",
@@ -113,6 +112,7 @@ class _ChatPageState extends State<ChatPage> {
       if (mounted) {
         if (success) {
           _pushNotificationService.sendNotificationToSelectedUser(
+            deviceToken: _otherUserData!.token,
             context: context,
             title: _otherUserData!.name,
             body: _messageController.text,
@@ -139,7 +139,6 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return ScreenWrapperWidget(
       showBackButton: true,
       actions: [
@@ -191,6 +190,7 @@ class _ChatPageState extends State<ChatPage> {
                           textType: chatProvider.messages[index].messageType,
                           context: context);
                     }
+                    return null;
                   },
                   separatorBuilder: (context, index) => SizedBox(height: 4.0),
                 );
@@ -198,10 +198,12 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            padding: EdgeInsets.symmetric(
+              horizontal: 8.0,
+              vertical: 8.0,
+            ),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              border: Border(top: BorderSide(color: Colors.grey[400]!)),
+              color: Colors.transparent,
             ),
             child: Row(
               children: [
@@ -213,12 +215,16 @@ class _ChatPageState extends State<ChatPage> {
                     },
                     decoration: InputDecoration(
                       hintText: "Aa",
+                      hintStyle:
+                          Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20.0),
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     ),
@@ -235,7 +241,9 @@ class _ChatPageState extends State<ChatPage> {
                     return IconButtonWidget(
                       onTap: handleSendMessage,
                       hugeIcon: HugeIcons.strokeRoundedSent,
-                      color: hasText ? Colors.blue : Colors.black,
+                      color: hasText
+                          ? Theme.of(context).colorScheme.secondary
+                          : Theme.of(context).colorScheme.onSurface,
                     );
                   },
                 ),
@@ -266,7 +274,9 @@ class _ChatPageState extends State<ChatPage> {
               )
             : EdgeInsets.all(4.0),
         decoration: BoxDecoration(
-          color: isAuthMessage ? Colors.blue[100] : Colors.grey[200],
+          color: isAuthMessage
+              ? Theme.of(context).colorScheme.secondary
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12.0),
           boxShadow: [
             BoxShadow(
@@ -294,7 +304,7 @@ class _ChatPageState extends State<ChatPage> {
       child: Text(
         content,
         style: TextStyle(
-          color: isAuthMessage ? Colors.black87 : Colors.black54,
+          color: Theme.of(context).colorScheme.onSurface,
           fontSize: 16.0,
         ),
       ),

@@ -5,7 +5,8 @@ class AppColors {
   static const lightBackgroundStart = Color(0xFFFFF1CC);
   static const lightBackgroundMiddle = Color(0xFFFFE8A3);
   static const lightBackgroundEnd = Color(0xFFFFDF80);
-  static const lightSurface = Color(0xFFFFF8E1);
+  // static const lightSurface = Color(0xFFFFF8E1);
+  static const lightSurface = Color(0xFFF5E8C7);
   static const lightOnSurface = Color(0xFF3E2723);
   static const lightPrimary = Color(0xFFF4511E);
   static const lightSecondary = Color(0xFF689F38);

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:reels/config/extension.dart';
 
 import 'package:reels/services/firebase_service.dart';
+import 'package:reels/services/utils_service.dart';
+import 'package:reels/widgets/loading_widget.dart';
 import 'package:reels/widgets/screen_wrapper_widget.dart';
 import 'package:reels/widgets/text_field_widget.dart';
 
@@ -47,6 +48,8 @@ class _RecoverEmailPageState extends State<RecoverEmailPage> {
                   horizontal: size.width * 0.2,
                   vertical: 15,
                 ),
+                backgroundColor:
+                    _hasSending ? null : Theme.of(context).colorScheme.primary,
               ),
               onPressed: _hasSending
                   ? null
@@ -58,12 +61,10 @@ class _RecoverEmailPageState extends State<RecoverEmailPage> {
                       });
 
                       if (!_validEmail) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Please enter a valid email address"),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        UtilsService.showSnackBar(
+                            context: context,
+                            isError: true,
+                            content: "Please enter a valid email address.");
                         return;
                       }
 
@@ -78,20 +79,15 @@ class _RecoverEmailPageState extends State<RecoverEmailPage> {
                         setState(() {
                           _hasSending = true;
                         });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                "Recovery email has been sent! Check your inbox."),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
+                        UtilsService.showSnackBar(
+                            context: context,
+                            content:
+                                "Recovery email has been sent! Check your inbox.");
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Error: ${e.toString()}"),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        UtilsService.showSnackBar(
+                            context: context,
+                            isError: true,
+                            content: "Please enter a valid email address.");
                       }
 
                       setState(() {
@@ -107,10 +103,7 @@ class _RecoverEmailPageState extends State<RecoverEmailPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     )
-                  : SpinKitThreeBounce(
-                      color: Theme.of(context).colorScheme.onError,
-                      size: 23,
-                    ),
+                  : LoadingWidget(),
             ),
           ],
         ),

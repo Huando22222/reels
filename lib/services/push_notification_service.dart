@@ -52,7 +52,7 @@ class PushNotificationService {
 
   //static
   Future<void> sendNotificationToSelectedUser({
-    // required String deviceToken,
+    required String deviceToken,
     required BuildContext context,
     required String title,
     required String body,
@@ -64,9 +64,9 @@ class PushNotificationService {
 
     final Map<String, dynamic> message = {
       'message': {
-        'token':
-            "ePz3cCx1ReaYImN9WRcQRR:APA91bFGmhBuvf09PQrezKlEX2ICEGHCzMoGnHaQ0K9r2q3CDANEuN9nxiQN9ten402I8SL7qj-NI_wHlV4DbRoRYXBb1lgkprHXTfY_l_KnCg_l5yQysJs", //testing only
-        // 'token': deviceToken,
+        // 'token':
+        //     "ePz3cCx1ReaYImN9WRcQRR:APA91bFGmhBuvf09PQrezKlEX2ICEGHCzMoGnHaQ0K9r2q3CDANEuN9nxiQN9ten402I8SL7qj-NI_wHlV4DbRoRYXBb1lgkprHXTfY_l_KnCg_l5yQysJs", //testing only
+        'token': deviceToken,
         'notification': {
           'title': title,
           'body': body,
@@ -88,6 +88,7 @@ class PushNotificationService {
       log('gui thong bao thanh cong');
     } else {
       //
+      log('ERROR: gui thong bao khong thanh cong');
     }
   }
 
@@ -188,8 +189,8 @@ class PushNotificationService {
 
     FirebaseMessaging.onMessageOpenedApp.listen(
       (RemoteMessage message) async {
-        await Navigator.of(context)
-            .pushNamed('routeName:asdasdasdasdasdasdasdasd');
+        // await Navigator.of(context)
+        //     .pushNamed('routeName:asdasdasdasdasdasdasdasd');
       },
     );
 

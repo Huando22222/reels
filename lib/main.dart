@@ -7,6 +7,7 @@ import 'package:reels/config/app_route.dart';
 import 'package:reels/const/app_api.dart';
 import 'package:reels/const/app_theme.dart';
 import 'package:reels/firebase_options.dart';
+import 'package:reels/providers/app_settings_provider.dart';
 import 'package:reels/providers/chat_list_provider.dart';
 import 'package:reels/providers/chat_provider.dart';
 import 'package:reels/providers/notification_provider.dart';
@@ -38,6 +39,7 @@ void main() async {
     runApp(
       MultiProvider(
         providers: [
+          ChangeNotifierProvider(create: (context) => AppSettingsProvider()),
           ChangeNotifierProvider(create: (context) => UserProvider()),
           ChangeNotifierProvider(create: (context) => ChatListProvider()),
           ChangeNotifierProvider(create: (context) => ChatProvider()),
@@ -55,13 +57,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      initialRoute: AppRoute.main,
-      routes: AppRoute.pages,
+    // return MaterialApp(
+    //   debugShowCheckedModeBanner: false,
+    //   title: 'Flutter Demo',
+    //   theme: AppTheme.light,
+    //   darkTheme: AppTheme.dark,
+    //   initialRoute: AppRoute.main,
+    //   routes: AppRoute.pages,
+    // );
+    return Consumer<AppSettingsProvider>(
+      builder: (context, value, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Flutter Demo',
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: value.themeMode,
+          initialRoute: AppRoute.main,
+          routes: AppRoute.pages,
+        );
+      },
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:reels/config/extension.dart';
+import 'package:reels/services/utils_service.dart';
+import 'package:reels/widgets/icon_button_widget.dart';
+import 'package:reels/widgets/loading_widget.dart';
 import 'package:rive/rive.dart' as rive;
 import 'package:reels/services/firebase_service.dart';
 import 'package:reels/widgets/screen_wrapper_widget.dart';
@@ -20,13 +22,56 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  bool _validEmail = true;
-  bool _validPassword = true;
+  bool _validEmail = false;
+  bool _validPassword = false;
   bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
+
+    // Add listeners for real-time validation
+    _emailController.addListener(() {
+      setState(() {
+        _validEmail = _emailController.text.trim().isValidEmail();
+      });
+    });
+
+    _passwordController.addListener(() {
+      setState(() {
+        _validPassword = _isValidPassword(
+          _passwordController.text.trim(),
+          _confirmPasswordController.text.trim(),
+        );
+      });
+    });
+
+    _confirmPasswordController.addListener(() {
+      setState(() {
+        _validPassword = _isValidPassword(
+          _passwordController.text.trim(),
+          _confirmPasswordController.text.trim(),
+        );
+      });
+    });
   }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  bool _isValidPassword(String password, String confirmPassword) {
+    return password.isNotEmpty &&
+        confirmPassword.isNotEmpty &&
+        password == confirmPassword &&
+        password.isValidPassword();
+  }
+
+  bool get _isFormValid => _validEmail && _validPassword;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +122,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 TextFieldWidget(
                   controller: _emailController,
                   icon: HugeIcons.strokeRoundedMail01,
@@ -86,16 +131,24 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const Spacer(),
                 TextFieldWidget(
-                  controller: _passwordController,
-                  icon: HugeIcons.strokeRoundedLockPassword,
-                  hintText: "password",
-                  isValid: _validPassword,
-                ),
+                    controller: _passwordController,
+                    icon: HugeIcons.strokeRoundedLockPassword,
+                    hintText: "Password",
+                    isValid: _validPassword,
+                    trailing: IconButtonWidget(
+                      onTap: () {
+                        UtilsService.showSnackBar(
+                            context: context,
+                            content:
+                                "The password must contain at least 8 characters.");
+                      },
+                      hugeIcon: HugeIcons.strokeRoundedStickyNote01,
+                    )),
                 const Spacer(),
                 TextFieldWidget(
                   controller: _confirmPasswordController,
                   icon: HugeIcons.strokeRoundedLockPassword,
-                  hintText: "confirm password",
+                  hintText: "Confirm Password",
                   isValid: _validPassword,
                 ),
                 const Spacer(),
@@ -103,54 +156,48 @@ class _RegisterPageState extends State<RegisterPage> {
                   width: size.width * 0.8,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 16,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       elevation: 5,
                     ),
-                    onPressed: () async {
-                      setState(() {
-                        _validEmail = _emailController.text.isNotEmpty &&
-                            _emailController.text.isValidEmail();
-                        _validPassword = _isValidPassword(
-                          _passwordController.text,
-                          _confirmPasswordController.text,
-                        );
-                      });
-                      if (!_validEmail || !_validPassword) return;
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      final res =
-                          await _authService.createUserWithEmailAndPassword(
-                              email: _emailController.text,
-                              password: _passwordController.text);
-                      if (res != null) {
-                        Navigator.of(context).pop();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  "Email or password is invalid\nOr your email have already been created. \ntry recover it")),
-                        );
-                      }
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    },
-                    child: !_isLoading
-                        ? Text(
+                    onPressed: (!_isFormValid || _isLoading)
+                        ? null
+                        : () async {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            final res = await _authService
+                                .createUserWithEmailAndPassword(
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text.trim(),
+                            );
+                            if (res != null) {
+                              Navigator.of(context).pop();
+                            } else {
+                              UtilsService.showSnackBar(
+                                context: context,
+                                isError: true,
+                                content:
+                                    "Email or password is invalid\nOr your email has already been created.\nTry recovering it.",
+                              );
+                            }
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          },
+                    child: _isLoading
+                        ? SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: LoadingWidget(),
+                          )
+                        : Text(
                             "Register",
                             style: TextStyle(
                               fontSize: 16,
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),
-                          )
-                        : SpinKitThreeBounce(
-                            color: Theme.of(context).colorScheme.onError,
-                            size: 23,
                           ),
                   ),
                 ),
@@ -161,86 +208,5 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       ),
     );
-  }
-
-//////////////////////////
-//  TextFieldWidget(
-//                 controller: _emailController,
-//                 icon: HugeIcons.strokeRoundedMail01,
-//                 hintText: "Email",
-//                 isValid: _validEmail,
-//               ),
-//               TextFieldWidget(
-//                 controller: _passwordController,
-//                 icon: HugeIcons.strokeRoundedLockPassword,
-//                 hintText: "password",
-//                 isValid: _validPassword,
-//               ),
-//               TextFieldWidget(
-//                 controller: _confirmPasswordController,
-//                 icon: HugeIcons.strokeRoundedLockPassword,
-//                 hintText: "confirm password",
-//                 isValid: _validPassword,
-//               ),
-//               SizedBox(
-//                 width: size.width * 0.8,
-//                 child: ElevatedButton(
-//                   style: ElevatedButton.styleFrom(
-//                     padding: EdgeInsets.symmetric(
-//                       vertical: 16,
-//                     ),
-//                     backgroundColor: Theme.of(context).colorScheme.primary,
-//                     elevation: 5,
-//                   ),
-//                   onPressed: () async {
-//                     setState(() {
-//                       _validEmail = _emailController.text.isNotEmpty &&
-//                           _emailController.text.isValidEmail();
-//                       _validPassword = _isValidPassword(
-//                         _passwordController.text,
-//                         _confirmPasswordController.text,
-//                       );
-//                     });
-//                     if (!_validEmail || !_validPassword) return;
-//                     setState(() {
-//                       _isLoading = true;
-//                     });
-//                     final res =
-//                         await _authService.createUserWithEmailAndPassword(
-//                             email: _emailController.text,
-//                             password: _passwordController.text);
-//                     if (res != null) {
-//                       Navigator.of(context).pop();
-//                     } else {
-//                       ScaffoldMessenger.of(context).showSnackBar(
-//                         SnackBar(
-//                             content: Text(
-//                                 "Email or password is invalid\nOr your email have already been created. \ntry recover it")),
-//                       );
-//                     }
-//                     setState(() {
-//                       _isLoading = false;
-//                     });
-//                   },
-//                   child: !_isLoading
-//                       ? Text(
-//                           "Register",
-//                           style: TextStyle(
-//                             fontSize: 16,
-//                             color: Theme.of(context).colorScheme.onPrimary,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         )
-//                       : SpinKitThreeBounce(
-//                           color: Theme.of(context).colorScheme.onError,
-//                           size: 23,
-//                         ),
-//                 ),
-//               ),
-  bool _isValidPassword(String password, String confirmPassword) {
-    return password.isNotEmpty &&
-        confirmPassword.isNotEmpty &&
-        password == confirmPassword &&
-        password.length >= 6;
   }
 }

@@ -6,10 +6,12 @@ import 'package:rive/rive.dart' as rive;
 class VerifiedEmail extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
+  final Color? color;
   const VerifiedEmail({
     super.key,
     required this.text,
     required this.onTap,
+    this.color,
   });
 
   @override
@@ -26,12 +28,24 @@ class VerifiedEmail extends StatelessWidget {
               height: size.height * 0.1,
               child: rive.RiveAnimation.asset('assets/riv/fingerPrint.riv'),
             ),
-            Text("Verified your email"),
+            Text(
+              "Verified your email",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             ElevatedButton(
               onPressed: onTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                padding: EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: MediaQuery.of(context).size.width * 0.3,
+                ),
+              ),
               child: Text(
                 text,
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
             SizedBox(
@@ -43,7 +57,9 @@ class VerifiedEmail extends StatelessWidget {
               },
               child: Text(
                 "Logout",
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
           ],

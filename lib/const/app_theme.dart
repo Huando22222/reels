@@ -7,21 +7,23 @@ class AppTheme {
     primaryColor: AppColors.lightPrimary,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.lightPrimary,
+        backgroundColor: AppColors.lightSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
+        elevation: 4,
       ),
     ),
+    dividerTheme: DividerThemeData(color: AppColors.lightSurface),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
     ),
     scaffoldBackgroundColor: AppColors.lightBackground,
     textTheme: TextTheme(
-      titleLarge: TextStyle(
-          fontSize: AppValue.size.xxl, color: AppColors.lightSecondary),
+      titleLarge:
+          TextStyle(fontSize: AppValue.size.xxl, color: AppColors.lightPrimary),
       titleMedium:
-          TextStyle(fontSize: AppValue.size.xl, color: AppColors.lightAccent),
+          TextStyle(fontSize: AppValue.size.xl, color: AppColors.lightPrimary),
       bodyLarge: TextStyle(
           fontSize: AppValue.size.l, color: AppColors.lightTextPrimary),
       bodyMedium: TextStyle(
@@ -31,7 +33,7 @@ class AppTheme {
     ),
     colorScheme: const ColorScheme.light(
       primary: AppColors.lightPrimary,
-      secondary: AppColors.lightSecondary,
+      secondary: AppColors.lightAccent,
       surface: AppColors.lightSurface,
       onSurface: AppColors.lightOnSurface,
       error: AppColors.lightError,
@@ -45,8 +47,15 @@ class AppTheme {
     primaryColor: AppColors.darkPrimary,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.darkPrimary,
+        backgroundColor: AppColors.darkSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        elevation: 4,
       ),
+    ),
+    dividerTheme: DividerThemeData(
+      color: AppColors.darkOnSurface,
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
@@ -54,9 +63,9 @@ class AppTheme {
     scaffoldBackgroundColor: AppColors.darkBackground,
     textTheme: TextTheme(
       titleLarge:
-          TextStyle(fontSize: AppValue.size.xxl, color: AppColors.darkAccent),
+          TextStyle(fontSize: AppValue.size.xxl, color: AppColors.darkPrimary),
       titleMedium:
-          TextStyle(fontSize: AppValue.size.xl, color: AppColors.darkAccent),
+          TextStyle(fontSize: AppValue.size.xl, color: AppColors.darkPrimary),
       //title content
       bodyLarge: TextStyle(
           fontSize: AppValue.size.l, color: AppColors.darkTextPrimary),
@@ -69,13 +78,14 @@ class AppTheme {
     ),
     colorScheme: const ColorScheme.dark(
       primary: AppColors.darkPrimary,
-      secondary: AppColors.darkSecondary,
+      secondary: AppColors.darkAccent,
+      // secondary: AppColors.darkSecondary,
       surface: AppColors.darkSurface,
       error: AppColors.darkError,
+      onError: Colors.black,
       onPrimary: Colors.black,
       onSecondary: Colors.black,
       onSurface: AppColors.darkOnSurface,
-      onError: Colors.black,
     ),
   );
 }

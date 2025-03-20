@@ -57,29 +57,53 @@ class PostProvider extends ChangeNotifier {
         folderPath: 'posts/${context.read<UserProvider>().userData!.email}',
       );
       if (urlBucket == null || urlBucket.isEmpty) return false;
-      final data = context.read<UserProvider>().userData!;
+      final userData = context.read<UserProvider>().userData!;
 
       PostModel post = PostModel(
         id: FirebaseFirestore.instance.collection('posts').doc().id,
-        owner: data,
+        owner: userData,
         content: content ?? "",
         image: urlBucket,
-        visibleTo: [...data.friends, data.uid],
+        visibleTo: [...userData.friends, userData.uid],
         createdAt: DateTime.now(),
       );
       await FirebaseFirestore.instance
           .collection('posts')
           .doc(post.id)
           .set(post.toJson());
-      // for (var friend in data.friends) {
-      //   pushNotificationService.sendNotificationToSelectedUser(
-      //     //id
-      //     context: context,
-      //     title: 'New Post',
-      //     body: "${data.name} has new status",
-      //     data: {},
-      //   );
-      // }
+
+      ///notification
+      List<String> deviceTokenList = [];
+      if (userData.friends.isNotEmpty) {
+        final List<Future<DocumentSnapshot>> friendDocsFutures = userData
+            .friends
+            .map((uid) =>
+                FirebaseFirestore.instance.collection('users').doc(uid).get())
+            .toList();
+
+        final List<DocumentSnapshot> friendDocs =
+            await Future.wait(friendDocsFutures);
+
+        for (final doc in friendDocs) {
+          if (doc.exists) {
+            final data = doc.data() as Map<String, dynamic>;
+            final String token = data['token'] ?? '';
+            if (token.isNotEmpty) {
+              deviceTokenList.add(token);
+            }
+          }
+        }
+      }
+
+      for (var deviceToken in deviceTokenList) {
+        pushNotificationService.sendNotificationToSelectedUser(
+          deviceToken: deviceToken,
+          context: context,
+          title: 'New Post',
+          body: "${userData.name} has new status",
+          data: {},
+        );
+      }
 
       return true;
     } catch (e) {

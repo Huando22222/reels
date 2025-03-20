@@ -23,7 +23,9 @@ class TextFieldWidget extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: isValid! ? Colors.grey : Theme.of(context).colorScheme.error,
+            color: isValid!
+                ? Theme.of(context).colorScheme.secondary
+                : Theme.of(context).colorScheme.error,
             width: 1,
           ),
         ),
@@ -32,8 +34,9 @@ class TextFieldWidget extends StatelessWidget {
         children: [
           HugeIcon(
             icon: icon,
-            color:
-                isValid! ? Colors.black : Theme.of(context).colorScheme.error,
+            color: isValid!
+                ? Theme.of(context).colorScheme.secondary
+                : Theme.of(context).colorScheme.error,
             size: 24.0,
           ),
           SizedBox(
@@ -46,7 +49,7 @@ class TextFieldWidget extends StatelessWidget {
                 hintText: hintText,
                 border: InputBorder.none,
                 hintStyle: TextStyle(
-                  color: Colors.grey,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),

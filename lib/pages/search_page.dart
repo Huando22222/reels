@@ -11,6 +11,7 @@ import 'package:reels/providers/notification_provider.dart';
 import 'package:reels/providers/user_provider.dart';
 import 'package:reels/services/firebase_service.dart';
 import 'package:reels/services/push_notification_service.dart';
+import 'package:reels/services/utils_service.dart';
 import 'package:reels/widgets/avatar_widget.dart';
 import 'package:reels/widgets/icon_button_widget.dart';
 import 'package:reels/widgets/screen_wrapper_widget.dart';
@@ -26,6 +27,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final UserProvider _userProvider = UserProvider();
+  final FirebaseService _firebaseService = FirebaseService();
   final PushNotificationService _pushNotificationService =
       PushNotificationService();
   Timer? _debounce;
@@ -50,26 +52,28 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {});
   }
 
-  Future<bool> _showConfirmationDialog(BuildContext context) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Are you sure to unfriend?"),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text("No"),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text("Yes"),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
+  Future<void> _showConfirmationDialog({
+    required BuildContext context,
+    required FriendType friendType,
+    required int index,
+  }) async {
+    await UtilsService.showConfirmationDialog(
+      context: context,
+      title: "Are you sure to unfriend?",
+      onConfirm: () async {
+        final result = await _firebaseService.addOrRemoveFriend(
+          friendType: friendType,
+          otherUserId: _searchList[index].uid,
+        );
+
+        if (result) {
+          setState(() {
+            _searchList[index].friends.remove(_userProvider.userData!.uid);
+          });
+        }
+      },
+      onDecline: () {},
+    );
   }
 
   @override
@@ -127,7 +131,6 @@ class _SearchPageState extends State<SearchPage> {
                 ],
               ),
             ),
-
             //
             if (_searchList.isNotEmpty)
               Expanded(
@@ -162,28 +165,19 @@ class _SearchPageState extends State<SearchPage> {
                           _searchList[index].name,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
+                        subtitle: Text(
+                          _searchList[index].email,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                         trailing: GestureDetector(
                           onTap: () async {
                             FirebaseService firebaseService = FirebaseService();
 
                             if (friend == FriendType.friend) {
-                              bool confirm =
-                                  await _showConfirmationDialog(context);
-                              if (!confirm) return;
-
-                              final result =
-                                  await firebaseService.addOrRemoveFriend(
-                                friendType: friend,
-                                otherUserId: _searchList[index].uid,
-                              );
-
-                              if (result) {
-                                setState(() {
-                                  _searchList[index]
-                                      .friends
-                                      .remove(_userProvider.userData!.uid);
-                                });
-                              }
+                              await _showConfirmationDialog(
+                                  friendType: friend,
+                                  context: context,
+                                  index: index);
                             } else {
                               final result =
                                   await firebaseService.addOrRemoveFriend(
@@ -211,6 +205,7 @@ class _SearchPageState extends State<SearchPage> {
                                         .add(_userProvider.userData!.uid);
                                     _pushNotificationService
                                         .sendNotificationToSelectedUser(
+                                      deviceToken: _searchList[index].token,
                                       context: context,
                                       title: "Reels",
                                       body:
@@ -222,17 +217,14 @@ class _SearchPageState extends State<SearchPage> {
                               }
                             }
                           },
-                          child: HugeIcon(
-                            icon: friend == FriendType.friendRequest
+                          child: IconButtonWidget(
+                            hugeIcon: friend == FriendType.friendRequest
                                 ? HugeIcons.strokeRoundedMailSend02
                                 : (friend == FriendType.friend
                                     ? HugeIcons.strokeRoundedUserMultiple02
                                     : HugeIcons.strokeRoundedAddTeam),
-                            color: Colors.black,
-                            size: 24.0,
                           ),
                         ),
-                        subtitle: Text(_searchList[index].email),
                       );
                     } else {
                       return SizedBox.shrink();
