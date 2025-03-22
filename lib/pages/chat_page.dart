@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
+import 'package:reels/config/app_route.dart';
 import 'package:reels/models/message.dart';
 import 'package:reels/models/user.dart';
 import 'package:reels/pages/image_view_page.dart';
@@ -324,14 +325,8 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       child: GestureDetector(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ImageViewPage(
-                imageUrl: content,
-              ),
-            ),
-          );
+          Navigator.of(context)
+              .pushNamed(AppRoute.imageView, arguments: content);
         },
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),

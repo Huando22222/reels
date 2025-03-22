@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppSettingsProvider with ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.dark; // Default to dark mode
+  ThemeMode _themeMode = ThemeMode.dark;
   static const String _themeKey = 'theme_mode';
 
   AppSettingsProvider() {

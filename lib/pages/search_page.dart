@@ -163,10 +163,14 @@ class _SearchPageState extends State<SearchPage> {
                         ),
                         title: Text(
                           _searchList[index].name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         subtitle: Text(
                           _searchList[index].email,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         trailing: GestureDetector(

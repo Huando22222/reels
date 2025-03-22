@@ -64,8 +64,6 @@ class PushNotificationService {
 
     final Map<String, dynamic> message = {
       'message': {
-        // 'token':
-        //     "ePz3cCx1ReaYImN9WRcQRR:APA91bFGmhBuvf09PQrezKlEX2ICEGHCzMoGnHaQ0K9r2q3CDANEuN9nxiQN9ten402I8SL7qj-NI_wHlV4DbRoRYXBb1lgkprHXTfY_l_KnCg_l5yQysJs", //testing only
         'token': deviceToken,
         'notification': {
           'title': title,

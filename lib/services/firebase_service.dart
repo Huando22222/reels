@@ -2,10 +2,10 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:reels/models/notification.dart';
+import 'package:reels/models/post.dart';
 import 'package:reels/models/response.dart';
-
 import 'package:reels/models/user.dart';
-import 'package:reels/pages/profile_page.dart';
 
 class FirebaseService {
   FirebaseService._internal();
@@ -14,16 +14,13 @@ class FirebaseService {
     return _instance;
   }
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
-
   User? getCurrentUser() {
-    return _auth.currentUser;
+    return FirebaseAuth.instance.currentUser;
   }
 
   Future<ResponseModel> upsertUser({required UserModel user}) async {
     try {
-      await _fireStore.collection('users').doc(user.uid).set({
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'uid': user.uid,
         'name': user.name,
         'email': user.email,
@@ -40,7 +37,7 @@ class FirebaseService {
 
   Future<UserModel?> getUserData({required String uid}) async {
     try {
-      final data = await _fireStore
+      final data = await FirebaseFirestore.instance
           .collection('users')
           .doc(uid)
           .get(const GetOptions(source: Source.server));
@@ -59,12 +56,12 @@ class FirebaseService {
   }
 
   Future<bool> isVerified() async {
-    await _auth.currentUser!.reload();
+    await FirebaseAuth.instance.currentUser!.reload();
     return FirebaseAuth.instance.currentUser!.emailVerified;
   }
 
   Future<void> sendEmailVerification() async {
-    return await _auth.currentUser!.sendEmailVerification();
+    return await FirebaseAuth.instance.currentUser!.sendEmailVerification();
   }
 
   Future<UserCredential?> signInWithEmailPassword({
@@ -72,8 +69,8 @@ class FirebaseService {
     required String password,
   }) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
 
       return userCredential;
     } on FirebaseAuthException catch (e, stacktrace) {
@@ -88,7 +85,7 @@ class FirebaseService {
     required String password,
   }) async {
     try {
-      UserCredential userCredential = await _auth
+      UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
       upsertUser(
@@ -113,7 +110,7 @@ class FirebaseService {
   }
 
   Future<List<UserModel>> searchUser({required String name}) async {
-    final snapshot = await _fireStore
+    final snapshot = await FirebaseFirestore.instance
         .collection("users")
         .where("name", isGreaterThanOrEqualTo: name)
         .get();
@@ -122,7 +119,7 @@ class FirebaseService {
 
   Future<void> signOut() async {
     //offline set later
-    return await _auth.signOut();
+    return await FirebaseAuth.instance.signOut();
   }
 
   Future<bool> addOrRemoveFriend({
@@ -130,10 +127,11 @@ class FirebaseService {
     required String otherUserId,
   }) async {
     try {
-      final String currentUserId = _auth.currentUser!.uid;
-      final otherUserRef = _fireStore.collection('users').doc(otherUserId);
+      final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+      final otherUserRef =
+          FirebaseFirestore.instance.collection('users').doc(otherUserId);
 
-      await _fireStore.runTransaction((transaction) async {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
         final otherUserSnapshot = await transaction.get(otherUserRef);
 
         if (!otherUserSnapshot.exists) {
@@ -280,5 +278,21 @@ class FirebaseService {
     }
 
     return returnList;
+  }
+
+  Future<List<PostModel>> getListPostFriend({required String uidFriend}) async {
+    log("getListPostFriend");
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('owner.uid', isEqualTo: uidFriend)
+        .where('visibleTo',
+            arrayContains: FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    return querySnapshot.docs.map(
+      (e) {
+        log("$e");
+        return PostModel.fromJson(e.data());
+      },
+    ).toList();
   }
 }

@@ -3,8 +3,10 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 import 'package:reels/config/app_route.dart';
 import 'package:reels/models/notification.dart';
+import 'package:reels/models/post.dart';
 import 'package:reels/models/user.dart';
 import 'package:reels/providers/notification_provider.dart';
+import 'package:reels/providers/post_provider.dart';
 import 'package:reels/providers/user_provider.dart';
 import 'package:reels/services/firebase_service.dart';
 import 'package:reels/services/push_notification_service.dart';
@@ -14,16 +16,69 @@ import 'package:reels/widgets/icon_button_widget.dart';
 import 'package:reels/widgets/loading_widget.dart';
 import 'package:reels/widgets/screen_wrapper_widget.dart';
 
-enum FriendType {
-  friend,
-  notFriend,
-  friendRequest,
-}
-
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
-  void showModal({required BuildContext context}) async {
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final UserProvider _userProvider = UserProvider();
+  bool _isUser = true;
+  late UserModel _profileData;
+  bool _initialized = false;
+  List<PostModel> _postList = [];
+  FriendType friend = FriendType.notFriend;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  didChangeDependencies() async {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      _isUser = ModalRoute.of(context)?.settings.arguments == null;
+      if (_isUser) {
+        _profileData =
+            Provider.of<UserProvider>(context, listen: true).userData!;
+
+        _postList = context
+            .read<PostProvider>()
+            .listPosts
+            .where(
+              (element) => element.owner.uid == _profileData.uid,
+            )
+            .toList();
+      } else {
+        if (!_isUser) {
+          final FirebaseService firebaseService = FirebaseService();
+          _profileData =
+              (ModalRoute.of(context)?.settings.arguments as UserModel?)!;
+
+          if (_profileData.friendRequests
+              .contains(context.read<UserProvider>().userData!.uid)) {
+            friend = FriendType.friendRequest;
+          } else if (_profileData.friends
+              .contains(context.read<UserProvider>().userData!.uid)) {
+            friend = FriendType.friend;
+
+            _postList = await firebaseService.getListPostFriend(
+                uidFriend: _profileData.uid);
+          } else {
+            friend = FriendType.notFriend;
+          }
+        }
+      }
+
+      setState(() {});
+    }
+  }
+
+  void _showModal({required BuildContext context}) async {
     final size = MediaQuery.of(context).size;
     final userData = context.read<UserProvider>().userData!;
     final FirebaseService firebaseService = FirebaseService();
@@ -181,32 +236,30 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
+  Future<List<PostModel>> getPostList() async {
+    if (_isUser) {
+      return context
+          .read<PostProvider>()
+          .listPosts
+          .where(
+            (e) => e.owner.uid == _profileData.uid,
+          )
+          .toList();
+    } else {
+      //
+    }
+    return [];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final UserModel? otherUserData =
-        ModalRoute.of(context)?.settings.arguments as UserModel?;
-    final userProvider = Provider.of<UserProvider>(context, listen: true);
-
-    FriendType friend = FriendType.notFriend;
-    if (otherUserData != null) {
-      if (otherUserData.friendRequests
-          .contains(context.read<UserProvider>().userData!.uid)) {
-        friend = FriendType.friendRequest;
-      } else if (otherUserData.friends
-          .contains(context.read<UserProvider>().userData!.uid)) {
-        friend = FriendType.friend;
-      } else {
-        friend = FriendType.notFriend;
-      }
-    }
-
     return ScreenWrapperWidget(
       showBackButton: true,
       actions: [
-        if (otherUserData == null) ...[
+        if (_isUser) ...[
           IconButtonWidget(
             hugeIcon: HugeIcons.strokeRoundedUserMultiple02,
-            onTap: () => showModal(context: context),
+            onTap: () => _showModal(context: context),
           ),
           IconButtonWidget(
             hugeIcon: HugeIcons.strokeRoundedSettings02,
@@ -217,7 +270,7 @@ class ProfilePage extends StatelessWidget {
           IconButtonWidget(
             hugeIcon: HugeIcons.strokeRoundedLogout05,
             onTap: () {
-              userProvider.signOut(context);
+              _userProvider.signOut(context);
             },
           ),
         ] else ...[
@@ -226,7 +279,7 @@ class ProfilePage extends StatelessWidget {
             onTap: () {
               Navigator.of(context).pushNamed(
                 AppRoute.chat,
-                arguments: otherUserData,
+                arguments: _profileData,
               );
             },
           ),
@@ -249,67 +302,34 @@ class ProfilePage extends StatelessWidget {
                     // final result =
                     await firebaseService.addOrRemoveFriend(
                       friendType: friend,
-                      otherUserId: otherUserData.uid,
+                      otherUserId: _profileData.uid,
                     );
                   },
                   onDecline: () async {},
-                );
-                ////
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text(
-                        "Are you sure to unfriend?",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: Text(
-                            "Yes",
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: Text(
-                            "No",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
                 );
               } else {
                 //request- cancel req
                 final result = await firebaseService.addOrRemoveFriend(
                   friendType: friend,
-                  otherUserId: otherUserData.uid,
+                  otherUserId: _profileData.uid,
                 );
                 if (result) {
                   if (friend == FriendType.notFriend) {
                     final PushNotificationService pushNotificationService =
                         PushNotificationService();
                     pushNotificationService.sendNotificationToSelectedUser(
-                      deviceToken: otherUserData.token,
+                      deviceToken: _profileData.token,
                       context: context,
                       title: "Reels",
                       body:
-                          "Friend Request from ${userProvider.userData!.name}",
+                          "Friend Request from ${_userProvider.userData!.name}",
                       data: {},
                     );
                     context.read<NotificationProvider>().addNotification(
-                          sender: userProvider.userData!,
+                          sender: _userProvider.userData!,
                           sentTime: DateTime.now(),
                           type: NotificationType.friendRequest,
-                          receiverId: otherUserData.uid,
+                          receiverId: _profileData.uid,
                         );
                   }
                 }
@@ -323,7 +343,7 @@ class ProfilePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (otherUserData == null)
+            if (_isUser) ...[
               Consumer<UserProvider>(
                 builder: (context, value, child) {
                   if (value.userData == null) {
@@ -332,10 +352,49 @@ class ProfilePage extends StatelessWidget {
                   return _buildProfileContent(
                       user: value.userData!, context: context);
                 },
-              )
-            else
-              _buildProfileContent(user: otherUserData, context: context),
+              ),
+            ] else
+              _buildProfileContent(user: _profileData, context: context),
+            if (!_initialized)
+              CircularProgressIndicator()
+            else ...[
+              SizedBox(height: 20),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  ...List.generate(
+                    _postList.length,
+                    (index) {
+                      return _buildPost(imagePath: _postList[index].image);
+                    },
+                  )
+                ],
+              ),
+            ]
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPost({required String imagePath}) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context)
+            .pushNamed(AppRoute.imageView, arguments: imagePath);
+      },
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+            // border: Border.all(color: Colors.black),
+            ),
+        child: ClipRect(
+          child: Image.network(
+            imagePath,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

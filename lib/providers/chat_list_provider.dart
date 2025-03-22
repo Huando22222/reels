@@ -29,7 +29,6 @@ class ChatListProvider extends ChangeNotifier {
       Set<String> currentChats =
           chatSnapshots.docs.map((doc) => doc.id).toSet();
 
-      // Remove subscriptions for chats that no longer exist
       _chatDocSubscriptions.keys
           .where((id) => !currentChats.contains(id))
           .toList()
@@ -38,13 +37,11 @@ class ChatListProvider extends ChangeNotifier {
         _chatDocSubscriptions.remove(id);
       });
 
-      // Set up listeners for all current chats
       for (var chatDoc in chatSnapshots.docs) {
         String receiverId = chatDoc.id;
         _listenForChatUpdates(receiverId);
       }
 
-      // If no chats exist, clear the list
       if (chatSnapshots.docs.isEmpty) {
         chatList = [];
         notifyListeners();

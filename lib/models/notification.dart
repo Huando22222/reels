@@ -41,3 +41,9 @@ enum NotificationType {
   String toJson() => name;
   factory NotificationType.fromJson(String json) => values.byName(json);
 }
+
+enum FriendType {
+  friend,
+  notFriend,
+  friendRequest,
+}

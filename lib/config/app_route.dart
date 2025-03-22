@@ -1,6 +1,7 @@
 import 'package:reels/pages/chat_list_page.dart';
 import 'package:reels/pages/chat_page.dart';
 import 'package:reels/pages/edit_profile_page.dart';
+import 'package:reels/pages/image_view_page.dart';
 import 'package:reels/pages/noitfication_page.dart';
 import 'package:reels/pages/profile_page.dart';
 import 'package:reels/pages/recover_email_page.dart';
@@ -21,6 +22,7 @@ class AppRoute {
   static final register = '/auth/register';
   static final recoverEmail = '/auth/recover-email';
   static final editProfile = '/auth/edit-profile';
+  static final imageView = '/image-view';
 
   static final pages = {
     main: (context) => const MainPage(),
@@ -33,5 +35,6 @@ class AppRoute {
     editProfile: (context) => const EditProfilePage(),
     chat: (context) => const ChatPage(),
     chatList: (context) => const ChatListPage(),
+    imageView: (context) => const ImageViewPage(),
   };
 }

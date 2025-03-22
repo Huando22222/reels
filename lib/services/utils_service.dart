@@ -28,8 +28,6 @@ class UtilsService {
     SnackBarAction? action,
     bool isError = false,
   }) {
-    // final effectiveBackgroundColor =
-    //     backgroundColor ?? (isError ? Colors.redAccent : Colors.grey.shade800);
     final effectiveBackgroundColor = backgroundColor ??
         (isError
             ? Theme.of(context).colorScheme.error

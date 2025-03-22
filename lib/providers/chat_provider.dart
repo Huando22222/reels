@@ -13,6 +13,7 @@ class ChatProvider extends ChangeNotifier {
   StreamSubscription<DocumentSnapshot>? _chatSubscription;
 
   void listenForMessage({required String receiverId}) async {
+    log("start listening for message !!!!!!!!!!!!!!!");
     _chatSubscription?.cancel();
     FirebaseFirestore.instance
         .collection('users')

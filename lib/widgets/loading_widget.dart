@@ -3,15 +3,16 @@ import 'dart:math' show pi, cos, sin, min;
 
 class Polygon extends CustomPainter {
   final int sides;
-
+  final BuildContext context;
   Polygon({
     required this.sides,
+    required this.context,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.blue
+      ..color = Theme.of(context).colorScheme.secondary
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 3;
@@ -131,34 +132,56 @@ class _LoadingWidgetState extends State<LoadingWidget>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxSize = min(constraints.maxWidth, constraints.maxHeight);
+    // return LayoutBuilder(
+    //   builder: (context, constraints) {
+    //     final maxSize = min(constraints.maxWidth, constraints.maxHeight);
 
-        return AnimatedBuilder(
-          animation: Listenable.merge(
-            [
-              _sidesController,
-              _radiusController,
-              _rotationController,
-            ],
+    //     return AnimatedBuilder(
+    //       animation: Listenable.merge(
+    //         [
+    //           _sidesController,
+    //           _radiusController,
+    //           _rotationController,
+    //         ],
+    //       ),
+    //       builder: (context, child) {
+    //         return Transform(
+    //           alignment: Alignment.center,
+    //           transform: Matrix4.identity()
+    //             ..rotateX(_rotationAnimation.value)
+    //             ..rotateY(_rotationAnimation.value)
+    //             ..rotateZ(_rotationAnimation.value),
+    //           child: CustomPaint(
+    //             painter:
+    //                 Polygon(sides: _sidesAnimation.value, context: context),
+    //             child: SizedBox(
+    //               width: maxSize * _radiusAnimation.value,
+    //               height: maxSize * _radiusAnimation.value,
+    //             ),
+    //           ),
+    //         );
+    //       },
+    //     );
+    //   },
+    // );
+    return AnimatedBuilder(
+      animation: Listenable.merge(
+        [
+          _sidesController,
+          _radiusController,
+          _rotationController,
+        ],
+      ),
+      builder: (context, child) {
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..rotateX(_rotationAnimation.value)
+            ..rotateY(_rotationAnimation.value)
+            ..rotateZ(_rotationAnimation.value),
+          child: CustomPaint(
+            painter: Polygon(sides: _sidesAnimation.value, context: context),
           ),
-          builder: (context, child) {
-            return Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.identity()
-                ..rotateX(_rotationAnimation.value)
-                ..rotateY(_rotationAnimation.value)
-                ..rotateZ(_rotationAnimation.value),
-              child: CustomPaint(
-                painter: Polygon(sides: _sidesAnimation.value),
-                child: SizedBox(
-                  width: maxSize * _radiusAnimation.value,
-                  height: maxSize * _radiusAnimation.value,
-                ),
-              ),
-            );
-          },
         );
       },
     );
