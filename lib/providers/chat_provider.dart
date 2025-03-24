@@ -6,12 +6,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:reels/models/message.dart';
 import 'package:reels/services/image_service.dart';
+import 'package:reels/services/push_notification_service.dart';
 
 class ChatProvider extends ChangeNotifier {
   ScrollController scrollController = ScrollController();
   List<MessageModel> messages = [];
   StreamSubscription<DocumentSnapshot>? _chatSubscription;
-
+  final PushNotificationService _pushNotificationService =
+      PushNotificationService();
   void listenForMessage({required String receiverId}) async {
     log("start listening for message !!!!!!!!!!!!!!!");
     _chatSubscription?.cancel();

@@ -1,16 +1,23 @@
 # reels
 
-A new Flutter project.
+<div style="display: flex; justify-content: space-between;">
+    <img src="assets/demo/login_screen.png" alt="demo app" width="32%" />
+    <img src="assets/demo/register_screen.png" alt="demo app" width="32%" />
+    <img src="assets/demo/recover_screen.png" alt="demo app" width="32%" />
+</div>
+<div style="display: flex; justify-content: space-between;">
+    <img src="assets/demo/home_screen.png" alt="demo app" width="32%" />
+    <img src="assets/demo/search_screen.png" alt="demo app" width="32%" />
+    <img src="assets/demo/profile_screen.png" alt="demo app" width="32%" />
+</div>
+<div style="display: flex; justify-content: space-between;">
+    <img src="assets/demo/chat_screen.png" alt="demo app" width="32%" />
+</div>
 
-## Getting Started
+## Feature:
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+-   login with email and password (phone number , other social media will be added in future)
+-   search/add friend user with email
+-   chat/new post notifications
+-   light/dark theme,
+-   store file with supabase
